@@ -1,4 +1,3 @@
-using FamilyTree.BL;
 using FamilyTree.BL.Services;
 using FamilyTree.Core;
 using FamilyTree.Models.Common;
@@ -59,7 +58,7 @@ namespace FamilyTree.Controllers
         {
             _relationTypeService.EntryType = enmEntryType.D;
             return Ok(_relationTypeService.Delete(id));
-        }  
+        }
     }
 }
 

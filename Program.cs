@@ -1,8 +1,6 @@
 using FamilyTree.Data;
 using FamilyTree.Extensions;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using System.Configuration;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);

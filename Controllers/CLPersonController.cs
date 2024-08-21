@@ -1,10 +1,8 @@
 using FamilyTree.BL.Services;
 using FamilyTree.Core;
-using FamilyTree.Data;
 using FamilyTree.Models.Common;
 using FamilyTree.Models.Master;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace FamilyTree.Controllers
 {

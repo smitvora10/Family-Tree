@@ -3,7 +3,7 @@ using FamilyTree.Models.Master;
 
 namespace FamilyTree.DB.Interfaces
 {
-    public interface IRelationTypeRepository : IBaseRepository<RelationType>
+    public interface IRequestRepository : IBaseRepository<Request>
     {
 
     }

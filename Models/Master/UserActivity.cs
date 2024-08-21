@@ -11,7 +11,7 @@ public class UserActivity
     [Key]
     public int UserActivityId { get; set; }
 
-    [Required] 
+    [Required]
     public int UserId { get; set; }
 
     public string ActivityIdsToAdd { get; set; } // Comma-separated activity IDs to add
@@ -20,6 +20,7 @@ public class UserActivity
     /// <summary>
     /// Modification Datetime
     /// </summary>
+    [NotMapped]
     [Column(TypeName = "DATETIME")]
     public DateTime? ModificationDatetime { get; set; }
 }

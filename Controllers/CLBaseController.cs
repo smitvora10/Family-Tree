@@ -1,8 +1,6 @@
 using FamilyTree.Data;
-using FamilyTree.Models.Master;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System;
 
 namespace FamilyTree.Controllers
 {

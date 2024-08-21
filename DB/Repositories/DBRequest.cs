@@ -6,13 +6,13 @@ using Microsoft.EntityFrameworkCore;
 
 namespace FamilyTree.BL.Services
 {
-    public class DBRelationType : DBCommon<RelationType>, IRelationTypeRepository
+    public class DBRequest : DBCommon<Request>, IRequestRepository
     {
-        private readonly DbSet<RelationType> _dbSet;
+        private readonly DbSet<Request> _dbSet;
         private readonly DataContext _context;
-        public DBRelationType(DataContext context) : base(context)
+        public DBRequest(DataContext context) : base(context)
         {
-            _dbSet = context.Set<RelationType>();
+            _dbSet = context.Set<Request>();
         }
     }
 

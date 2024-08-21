@@ -19,6 +19,7 @@ public class Activity
     /// <summary>
     /// Modification Datetime
     /// </summary>
+    [NotMapped]
     [Column(TypeName = "DATETIME")]
     public DateTime? ModificationDatetime { get; set; }
 }

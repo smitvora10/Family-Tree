@@ -33,17 +33,19 @@ public class Qualification
     /// </summary>
     [Required]
     [StringLength(200)]
-    public string? QaulificationDesc{ get; set; }
+    public string? QaulificationDesc { get; set; }
 
 
     /// <summary>
     /// Creation Datetime
     /// </summary>
+    [NotMapped]
     public DateTime? CreationDatetime { get; set; } = null;
 
     /// <summary>
     /// Modified Datetime
     /// </summary>
+    [NotMapped]
     public DateTime? ModificationDatetime { get; set; } = null;
 
 }

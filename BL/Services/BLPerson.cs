@@ -1,12 +1,8 @@
-﻿using FamilyTree.Core;
-using FamilyTree.Data;
-using FamilyTree.Data.Common;
+﻿using FamilyTree.Data;
 using FamilyTree.DB.Interfaces;
-using FamilyTree.Migrations;
 using FamilyTree.Models.Common;
 using FamilyTree.Models.Master;
 using Microsoft.EntityFrameworkCore;
-using System.ComponentModel;
 
 namespace FamilyTree.BL.Services
 {
@@ -55,7 +51,7 @@ namespace FamilyTree.BL.Services
 
         public List<Person> BuildFamilyTree(Person currentPerson = null)
         {
-            HashSet<int> visitedPerson = new HashSet<int>();     
+            HashSet<int> visitedPerson = new HashSet<int>();
             if (currentPerson == null)
             {
                 return lstPerson
@@ -96,6 +92,11 @@ namespace FamilyTree.BL.Services
             };
             visitedPerson.Remove(currentPerson.PersonId);
             return objPerson;
+        }
+
+        public Response EditRequestMade()
+        {
+
         }
 
     }

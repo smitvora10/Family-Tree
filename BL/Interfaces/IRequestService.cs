@@ -2,7 +2,7 @@
 
 namespace FamilyTree.BL.Services
 {
-    public interface IRelationTypeService : IBaseService<RelationType>
+    public interface IRequestService : IBaseService<Request>
     {
 
     }

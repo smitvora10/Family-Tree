@@ -6,29 +6,27 @@ namespace FamilyTree.Models.Master;
 /// <summary>
 /// Relation Type
 /// </summary>
-public class RelationType
+public class Request
 {
     /// <summary>
     /// Relation Type Id
     /// </summary>
     [Key]
-    public int RelationTypeId { get; set; }
+    public int RequestId { get; set; }
 
     /// <summary>
-    /// Relation Type Code
+    /// Admin Approval Status (A = Approved, P = Pending, R = Rejected)
     /// </summary>
     [Required]
-    [StringLength(2)]
-    [Column(TypeName = "char(2)")] // Specifies the database column type as char(1)
-    public string? RelationTypeCode { get; set; }
+    [StringLength(1)]
+    [Column(TypeName = "char(1)")] // Specifies the database column type as char(1)
+    public string ApprovalStatus { get; set; } = "P";
 
     /// <summary>
-    /// Relation Type Description
+    /// Person Json For Req.
     /// </summary>
     [Required]
-    [StringLength(150)]
-    [Column(TypeName = "varchar(150)")] // Specifies the database column type as char(1)
-    public string? RelationTypeDescription { get; set; }
+    public string Person { get; set; }
 
     /// <summary>
     /// last Updated User Id
@@ -43,9 +41,9 @@ public class RelationType
     public DateTime CreationDatetime { get; set; }
 
     /// <summary>
-    /// Modification Datetime
+    /// Approved Datetime
     /// </summary>
     [NotMapped]
     [Column(TypeName = "DATETIME")]
-    public DateTime ModificationDatetime { get; set; }
+    public DateTime ApprovedDatetime { get; set; }
 }

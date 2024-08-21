@@ -1,10 +1,5 @@
 ﻿using FamilyTree.Core;
-using FamilyTree.Data;
-using FamilyTree.Data.Common;
 using FamilyTree.Models.Common;
-using FamilyTree.Models.Master;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace FamilyTree.BL.Services
 {
@@ -73,6 +68,11 @@ namespace FamilyTree.BL.Services
             }
 
             return response;
+        }
+
+        public virtual void Presave(TEntity entity)
+        {
+
         }
     }
 }

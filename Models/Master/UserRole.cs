@@ -45,12 +45,14 @@ public class UserRole
     /// Creation Datetime
     /// </summary>
     [Column(TypeName = "DATETIME")]
+    [NotMapped]
     public DateTime? CreationDatetime { get; set; }
 
     /// <summary>
     /// Modification Datetime
     /// </summary>
     [Column(TypeName = "DATETIME")]
+    [NotMapped]
     public DateTime? ModificationDatetime { get; set; }
 
 

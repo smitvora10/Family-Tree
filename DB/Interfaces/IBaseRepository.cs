@@ -1,6 +1,4 @@
-﻿using FamilyTree.Core;
-using FamilyTree.Models.Common;
-using System.Data;
+﻿using System.Data;
 
 namespace FamilyTree.BL.Services
 {

@@ -33,17 +33,19 @@ public class Occupation
     /// </summary>
     [Required]
     [StringLength(200)]
-    public string? OccupationDesc{ get; set; }
+    public string? OccupationDesc { get; set; }
 
 
     /// <summary>
     /// Creation Datetime
     /// </summary>
+    [NotMapped]
     public DateTime? CreationDatetime { get; set; } = null;
 
     /// <summary>
     /// Modified Datetime
     /// </summary>
+    [NotMapped]
     public DateTime? ModificationDatetime { get; set; } = null;
 
 }

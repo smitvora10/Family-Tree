@@ -1,5 +1,4 @@
-﻿using FamilyTree.Models.Master;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 
 namespace FamilyTree.Data;

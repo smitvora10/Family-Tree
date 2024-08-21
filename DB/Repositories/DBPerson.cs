@@ -1,11 +1,8 @@
-﻿using FamilyTree.Core;
-using FamilyTree.Data;
+﻿using FamilyTree.Data;
 using FamilyTree.Data.Common;
 using FamilyTree.DB.Interfaces;
-using FamilyTree.Models.Common;
 using FamilyTree.Models.Master;
 using Microsoft.EntityFrameworkCore;
-using Org.BouncyCastle.Asn1;
 using System.Data;
 
 namespace FamilyTree.BL.Services

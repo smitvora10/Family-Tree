@@ -1,7 +1,6 @@
 ﻿using FamilyTree.BL.Services;
 using FamilyTree.Data.Common;
 using FamilyTree.DB.Interfaces;
-using FamilyTree.Models.Master;
 
 namespace FamilyTree.Extensions
 {

@@ -39,5 +39,7 @@ namespace FamilyTree.BL.Services
         Response Delete(int id);
 
         Response ValidationBeforePreSave(TEntity entity);
+
+        void Presave(TEntity entity);
     }
 }

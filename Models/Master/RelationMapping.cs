@@ -52,8 +52,10 @@ public class RelationMapping
     /// <summary>
     /// Creation Datetime
     /// </summary>
+    [NotMapped]
     public DateTime? CreationDatetime { get; set; }
 
-    public DateTime? ModificationDatetime { get; set; }     
+    [NotMapped]
+    public DateTime? ModificationDatetime { get; set; }
 
 }

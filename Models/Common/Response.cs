@@ -1,5 +1,5 @@
-﻿using System.Data;
-using FamilyTree.Core;
+﻿using FamilyTree.Core;
+using System.Data;
 
 namespace FamilyTree.Models.Common
 {

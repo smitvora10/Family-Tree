@@ -1,7 +1,4 @@
 ﻿using FamilyTree.BL.Services;
-using FamilyTree.Data;
-using FamilyTree.Models.Master;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Data;
 
@@ -35,7 +32,7 @@ namespace FamilyTree.Data.Common
 
         public TEntity Add(TEntity entity)
         {
-            var result =  _dbSet.Add(entity);
+            var result = _dbSet.Add(entity);
             _context.SaveChanges();
             return result.Entity;
         }
@@ -56,7 +53,7 @@ namespace FamilyTree.Data.Common
                 _dbSet.Remove(entity);
                 delOpt = _context.SaveChanges();
             }
-            return delOpt; 
+            return delOpt;
         }
 
 

@@ -104,11 +104,14 @@ public class Person
     /// <summary>
     /// Creation Datetime
     /// </summary>
+
+    [NotMapped]
     public DateTime? CreationDatetime { get; set; } = null;
 
     /// <summary>
     /// Modified Datetime
     /// </summary>
+    [NotMapped]
     public DateTime? ModificationDatetime { get; set; } = null;
 
     /// <summary>
@@ -134,4 +137,9 @@ public class Person
     /// </summary>
     [NotMapped]
     public Person? Spouse { get; set; } = null;
+
+    /// <summary>
+    /// Image Blob field
+    /// </summary>
+    public byte[] Image { get; set; } = null;  // This is the BLOB field
 }
