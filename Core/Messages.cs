@@ -6,6 +6,7 @@
         {
             {MessageCode.E001,"No Records Found"},
             {MessageCode.E002,"Duplicate {~handler~} entry"},
+            {MessageCode.E003,"No Request Exists for the corresponding Id."},
         };
     }
 
@@ -20,5 +21,10 @@
         /// Duplicate {~handler~} entry
         /// </summary>
         E002,
+
+        /// <summary>
+        /// No Request Exists for the corresponding Id.
+        /// </summary>
+        E003,
     }
 }

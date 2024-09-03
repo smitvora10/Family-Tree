@@ -29,7 +29,7 @@ namespace FamilyTree.BL.Services
         Response GetById(int id);
 
         //Add Or Update
-        Response AddOrUpdate(TEntity entity);
+        Response AddOrUpdate();
 
         /// <summary>
         /// Delete the entity by ID

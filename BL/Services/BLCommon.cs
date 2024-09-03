@@ -6,7 +6,8 @@ namespace FamilyTree.BL.Services
     public class BLCommon<TEntity> : IBaseService<TEntity> where TEntity : class
     {
         private readonly IBaseRepository<TEntity> _dbContext;
-        Response response = new Response();
+        public Response response = new Response();
+        public TEntity _entity;
 
         public enmEntryType EntryType { get; set; }
 
@@ -44,13 +45,13 @@ namespace FamilyTree.BL.Services
             return response;
         }
 
-        public virtual Response AddOrUpdate(TEntity entity)
+        public virtual Response AddOrUpdate()
         {
             if (EntryType == enmEntryType.A)
-                response.DataModel = _dbContext.Add(entity);
+                response.DataModel = _dbContext.Add(_entity);
             else
             {
-                response.DataModel = _dbContext.Update(entity);
+                response.DataModel = _dbContext.Update(_entity);
             }
             return response;
         }
@@ -72,7 +73,7 @@ namespace FamilyTree.BL.Services
 
         public virtual void Presave(TEntity entity)
         {
-
+            _entity = entity;
         }
     }
 }

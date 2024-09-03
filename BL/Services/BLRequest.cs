@@ -1,8 +1,13 @@
-﻿using FamilyTree.Data;
+﻿using FamilyTree.Core;
+using FamilyTree.Data;
 using FamilyTree.DB.Interfaces;
+using FamilyTree.Models.Common;
 using FamilyTree.Models.Master;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
+using Org.BouncyCastle.Asn1.Ocsp;
+using System.Collections.Generic;
+using Request = FamilyTree.Models.Master.Request;
 
 namespace FamilyTree.BL.Services
 {
@@ -11,10 +16,42 @@ namespace FamilyTree.BL.Services
         private readonly IRequestRepository _dbContext;
         private readonly DbSet<Request> _dbSet;
         private readonly DataContext _context;
-        public BLRequest(IRequestRepository dbContext, DataContext context) : base(dbContext)
+        private readonly IPersonService _personService;
+        public Request objRequest { get; set; }
+
+        public BLRequest(IRequestRepository dbContext, IPersonService personService, DataContext context) : base(dbContext)
         {
+            _personService = personService;
             _dbContext = dbContext;
             _dbSet = context.Set<Request>();
+        }
+
+        public Response ApproveRequest()
+        {
+            Person objPerson = JsonConvert.DeserializeObject<Person>(objRequest.Person);
+            _personService.EntryType = objRequest.Action;
+            response = _personService.ValidationBeforePreSave(objPerson);
+            if (!response.IsError)
+            {
+                response = _personService.AddOrUpdate();
+                objRequest.ApprovalStatus = enmApprovalStatus.A.ToString();
+                //Update Approval Status
+                _dbContext.Update(objRequest);
+                return response;
+            }
+            return response;
+        }
+
+        public Response PreApproveRequest(int requestId)
+        {
+            objRequest = _dbSet.Find(requestId);
+            if (objRequest == null)
+            {
+                response.IsError = true;
+                response.Message = MessageCode.E003.ToString();
+            }
+
+            return response;
         }
 
         public override void Presave(Request entity)

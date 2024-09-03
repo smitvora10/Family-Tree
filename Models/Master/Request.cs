@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using FamilyTree.Core;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace FamilyTree.Models.Master;
@@ -32,6 +33,11 @@ public class Request
     /// last Updated User Id
     /// </summary>
     public int LastUpdatedUserId { get; set; } = 0;
+
+    /// <summary>
+    /// Action A/E/D
+    /// </summary>
+    public enmEntryType Action = enmEntryType.E;
 
     /// <summary>
     /// Creation Datetime

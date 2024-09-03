@@ -38,17 +38,18 @@ namespace FamilyTree.Controllers
             objResponse = _requestService.ValidationBeforePreSave(entity);
             if (!objResponse.IsError)
             {
-                objResponse = _requestService.PreSave(entity);
-                objResponse = _requestService.AddOrUpdate(entity);
+                _requestService.Presave(entity);
+                objResponse = _requestService.AddOrUpdate();
             }
-            return Ok(_requestService.AddOrUpdate(entity));
+            return Ok(_requestService.AddOrUpdate());
         }
 
         [HttpPut]
-        public async Task<IActionResult> Update(Request entity)
+        public IActionResult ApproveRequest(Request entity)
         {
             _requestService.EntryType = enmEntryType.E;
-            return Ok(_requestService.AddOrUpdate(entity));
+            _requestService.Presave(entity);
+            return Ok(_requestService.AddOrUpdate());
         }
 
         [HttpDelete]

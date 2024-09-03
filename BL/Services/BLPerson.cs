@@ -14,7 +14,6 @@ namespace FamilyTree.BL.Services
         private readonly DataContext _context;
 
         public List<Person> lstPerson = new List<Person>();
-        Response objResponse = new Response();
         public BLPerson(IPersonRepository dbContext, DataContext context) : base(dbContext)
         {
             _dbContext = dbContext;
@@ -35,7 +34,7 @@ namespace FamilyTree.BL.Services
             //    objResponse.IsError = true;
             //    objResponse.MessageCode = MessageCode.E002.ToString().Replace("~{handler}~", "Relation Type");
             //}
-            return objResponse;
+            return response;
 
         }
 
@@ -43,9 +42,9 @@ namespace FamilyTree.BL.Services
         {
             lstPerson = _dbSet.ToList();
 
-            objResponse.DataModel = BuildFamilyTree();
+            response.DataModel = BuildFamilyTree();
 
-            return objResponse;
+            return response;
 
         }
 
@@ -94,10 +93,6 @@ namespace FamilyTree.BL.Services
             return objPerson;
         }
 
-        public Response EditRequestMade()
-        {
-
-        }
 
     }
 }
