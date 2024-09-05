@@ -19,6 +19,12 @@ namespace FamilyTree.Extensions
             services.AddScoped<IPersonRepository, DBPerson>();
             services.AddScoped<IPersonService, BLPerson>();
 
+            services.AddScoped<IOccupationRepository, DBOccupation>();
+            services.AddScoped<IOccupationService, BLOccupation>();
+
+            services.AddScoped<IRequestRepository, DBRequest>();
+            services.AddScoped<IRequestService, BLRequest>();
+
         }
     }
 }
