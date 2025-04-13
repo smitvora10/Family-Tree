@@ -5,7 +5,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace FamilyTree.Models.Master;
 
 /// <summary>
-/// Relation Type
+/// Person Request
 /// </summary>
 public class Request
 {

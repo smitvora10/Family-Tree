@@ -26,6 +26,7 @@ public partial class DataContext : DbContext
     public virtual DbSet<UserRole> UserRole { get; set; }
     public virtual DbSet<User> User { get; set; }
 
+    public virtual DbSet<Request> Request { get; set; }
     //public virtual DbSet<AllParentMapping> ParentChildMapping { get; set; }
 
 }

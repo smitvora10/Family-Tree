@@ -45,11 +45,16 @@ namespace FamilyTree.Controllers
         }
 
         [HttpPut]
-        public IActionResult ApproveRequest(Request entity)
+        public IActionResult ApproveRequest(int requestId, enmApprovalStatus ApprovalStatus = enmApprovalStatus.A)
         {
-            _requestService.EntryType = enmEntryType.E;
-            _requestService.Presave(entity);
-            return Ok(_requestService.AddOrUpdate());
+            _requestService.ApprovalStatus = ApprovalStatus;
+            objResponse = _requestService. PreApproveRequest (requestId);
+            if (!objResponse.IsError)
+            {
+                _requestService.Presave((Request)objResponse.DataModel);
+                objResponse = _requestService.ApproveRequest();
+            }
+            return Ok(objResponse);
         }
 
         [HttpDelete]

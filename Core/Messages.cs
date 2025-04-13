@@ -7,6 +7,8 @@
             {MessageCode.E001,"No Records Found"},
             {MessageCode.E002,"Duplicate {~handler~} entry"},
             {MessageCode.E003,"No Request Exists for the corresponding Id."},
+            {MessageCode.E004,"Request already Approved"},
+            {MessageCode.E005,"Request already Rejected"},
         };
     }
 
@@ -26,5 +28,15 @@
         /// No Request Exists for the corresponding Id.
         /// </summary>
         E003,
+
+        /// <summary>
+        /// Request already Approved
+        /// </summary>
+        E004,  
+        
+        /// <summary>
+        /// Request already Rejected
+        /// </summary>
+        E005,
     }
 }

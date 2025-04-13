@@ -18,6 +18,7 @@ namespace FamilyTree.BL.Services
         private readonly DataContext _context;
         private readonly IPersonService _personService;
         public Request objRequest { get; set; }
+        public enmApprovalStatus ApprovalStatus { get; set; }
 
         public BLRequest(IRequestRepository dbContext, IPersonService personService, DataContext context) : base(dbContext)
         {
@@ -26,6 +27,12 @@ namespace FamilyTree.BL.Services
             _dbSet = context.Set<Request>();
         }
 
+        public override Response GetAll()
+        {
+            List<Request> lstRequest = _dbContext.GetAll();
+            return response;
+
+        }
         public Response ApproveRequest()
         {
             Person objPerson = JsonConvert.DeserializeObject<Person>(objRequest.Person);
@@ -50,7 +57,29 @@ namespace FamilyTree.BL.Services
                 response.IsError = true;
                 response.Message = MessageCode.E003.ToString();
             }
-
+            else
+            {
+                response.DataModel = objRequest;
+            }
+            if (!response.IsError)
+            {
+                if (ApprovalStatus == enmApprovalStatus.A)
+                {
+                    if (objRequest.ApprovalStatus == "A")
+                    {
+                        response.IsError = true;
+                        response.Message = MessageCode.E004.ToString();
+                    }
+                }
+                if (ApprovalStatus == enmApprovalStatus.R)
+                {
+                    if (objRequest.ApprovalStatus == "R")
+                    {
+                        response.IsError = true;
+                        response.Message = MessageCode.E005.ToString();
+                    }
+                }
+            }
             return response;
         }
 

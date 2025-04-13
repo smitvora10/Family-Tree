@@ -4,6 +4,7 @@ using FamilyTree.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FamilyTree.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20241118152001_PersonModelChanges")]
+    partial class PersonModelChanges
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -114,6 +117,9 @@ namespace FamilyTree.Migrations
                     b.Property<string>("Qualification")
                         .HasColumnType("longtext");
 
+                    b.Property<int>("SpouseId")
+                        .HasColumnType("int");
+
                     b.HasKey("PersonId");
 
                     b.ToTable("Person");
@@ -173,7 +179,7 @@ namespace FamilyTree.Migrations
                     b.Property<string>("RelationTypeCode")
                         .IsRequired()
                         .HasMaxLength(2)
-                        .HasColumnType("char(3)");
+                        .HasColumnType("char(2)");
 
                     b.Property<int?>("RelationTypeId")
                         .IsRequired()
@@ -243,16 +249,10 @@ namespace FamilyTree.Migrations
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("UserId"));
 
-                    b.Property<DateTime?>("CreationDatetime")
-                        .HasColumnType("DATETIME");
-
                     b.Property<int>("LastUpdatedUserId")
                         .HasColumnType("int");
 
-                    b.Property<DateTime?>("ModificationDatetime")
-                        .HasColumnType("DATETIME");
-
-                    b.Property<string>("Password")
+                    b.Property<string>("PasswordHash")
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("varchar(100)");
@@ -287,6 +287,7 @@ namespace FamilyTree.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("RoleActivityIds")
+                        .IsRequired()
                         .HasColumnType("longtext");
 
                     b.Property<string>("UserRoleDescription")

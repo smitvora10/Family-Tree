@@ -22,8 +22,14 @@ namespace FamilyTree.Extensions
             services.AddScoped<IOccupationRepository, DBOccupation>();
             services.AddScoped<IOccupationService, BLOccupation>();
 
+            services.AddScoped<IQualificationRepository, DBQualification>();
+            services.AddScoped<IQualificationService, BLQualification>();
+
             services.AddScoped<IRequestRepository, DBRequest>();
             services.AddScoped<IRequestService, BLRequest>();
+              
+            services.AddScoped<IUserRepository, DBUser>();
+            services.AddScoped<IUserService, BLUser>();
 
         }
     }

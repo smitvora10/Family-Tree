@@ -25,6 +25,11 @@ namespace FamilyTree.Data.Common
             return _dbSet.Find(id);
         }
 
+        public TEntity CheckDuplicate(int id)
+        {
+            return _dbSet.Find(id);
+        }
+
         public bool EntityExists(int id)
         {
             return _dbSet.Find(id) != null;

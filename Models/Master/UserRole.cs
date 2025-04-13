@@ -25,9 +25,8 @@ public class UserRole
     /// <summary>
     /// Role Activity Ids
     /// </summary>
-    [Required]
     public string? RoleActivityIds { get; set; }
-
+      
     /// <summary>
     /// Is Super User Role
     /// </summary>

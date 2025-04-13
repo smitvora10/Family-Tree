@@ -35,7 +35,7 @@ public class RelationMapping
     /// </summary>
     [Required]
     [StringLength(2)]
-    [Column(TypeName = "char(2)")] // Specifies the database column type as char(2)
+    [Column(TypeName = "char(3)")] // Specifies the database column type as char(3)
     public string? RelationTypeCode { get; set; }
 
     /// <summary>

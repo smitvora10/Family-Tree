@@ -65,22 +65,22 @@ namespace FamilyTree.BL.Services
         }
         private Person BuildFamilyTreeNode(Person currentPerson, HashSet<int> visitedPerson)
         {
-            if (currentPerson == null || visitedPerson.Contains(currentPerson.PersonId) || visitedPerson.Contains(currentPerson.SpouseId))
+            if (currentPerson == null || visitedPerson.Contains(currentPerson.PersonId) /*|| visitedPerson.Contains(currentPerson.SpouseId)*/)
                 return null;
             visitedPerson.Add(currentPerson.PersonId);
-            Person spouse = lstPerson.FirstOrDefault(p => p.PersonId == currentPerson.SpouseId);
+            //Person spouse = lstPerson.FirstOrDefault(p => p.PersonId == currentPerson.SpouseId);
             Person objPerson = new Person
             {
                 PersonId = currentPerson.PersonId,
                 FirstName = currentPerson.FirstName,
                 LastName = currentPerson.LastName,
                 BirthDate = currentPerson.BirthDate,
-                DateOfDeath = currentPerson.DateOfDeath,
+                //DateOfDeath = currentPerson.DateOfDeath,
                 Description = currentPerson.Description,
                 MaritalStatus = currentPerson.MaritalStatus,
                 Address = currentPerson.Address,
-                OccupationId = currentPerson.OccupationId,
-                QualificationId = currentPerson.QualificationId,
+                Occupation = currentPerson.Occupation,
+                Qualification = currentPerson.Qualification,
                 //Mother = lstPerson.FirstOrDefault(p => p.PersonId == currentPerson.MotherId),
                 //Father = lstPerson.FirstOrDefault(p => p.PersonId == currentPerson.FatherId),
                 //Spouse = spouse != null && !visitedPerson.Contains(currentPerson.SpouseId) ? spouse : null,

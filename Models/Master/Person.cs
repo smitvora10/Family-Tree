@@ -23,6 +23,13 @@ public class Person
     public string? FirstName { get; set; }
 
     /// <summary>
+    /// Middle Name
+    /// </summary>
+    //[Required]
+    //[StringLength(100)]
+    //public string? MiddleName { get; set; }
+
+    /// <summary>
     /// Last Name
     /// </summary>
     [Required]
@@ -44,8 +51,8 @@ public class Person
     /// <summary>
     /// Spouse (Person) - Id
     /// </summary>
-    [Required]
-    public int SpouseId { get; set; }
+    //[Required]
+    //public int SpouseId { get; set; }
 
     /// <summary>
     /// Birth Date
@@ -69,7 +76,7 @@ public class Person
     /// <summary>
     /// Date of Death
     /// </summary>
-    public DateTime? DateOfDeath { get; set; } = null;
+    //public DateTime? DateOfDeath { get; set; } = null;
 
     /// <summary>
     /// Description
@@ -90,16 +97,28 @@ public class Person
     public string? Address { get; set; }
 
     /// <summary>
+    /// Address
+    /// </summary>
+    public string? OfficeAddress { get; set; }
+
+    /// <summary>
     /// Occupation
     /// </summary>
-    [DefaultValue(0)]
-    public int? OccupationId { get; set; }
+    //[DefaultValue(0)]
+    public string? Occupation { get; set; }
 
     /// <summary>
     /// Qualification
     /// </summary>
-    [DefaultValue(0)]
-    public int? QualificationId { get; set; }
+    //[DefaultValue(0)]
+    public string? Qualification { get; set; }
+
+    /// <summary>
+    /// Is Main Person
+    /// </summary>
+    [StringLength(1)]
+    [Column(TypeName = "char(1)")] // Specifies the database column type as char(1)
+    public string? IsMainPerson { get; set; } = "N";
 
     /// <summary>
     /// Creation Datetime
