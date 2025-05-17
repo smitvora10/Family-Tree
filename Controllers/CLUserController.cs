@@ -3,6 +3,7 @@ using FamilyTree.Core;
 using FamilyTree.Models.Common;
 using FamilyTree.Models.Master;
 using Microsoft.AspNetCore.Mvc;
+using System.Data;
 
 namespace FamilyTree.Controllers
 {
@@ -31,6 +32,7 @@ namespace FamilyTree.Controllers
         }
 
         [HttpPost]
+        [Authorize("Admin")]
         public IActionResult Create(User entity)
         {
             _userService.EntryType = enmEntryType.A;
@@ -44,6 +46,7 @@ namespace FamilyTree.Controllers
         }
 
         [HttpPut]
+        [Authorize("Admin")]
         public async Task<IActionResult> Update(User entity)
         {
             _userService.EntryType = enmEntryType.E;
@@ -57,6 +60,7 @@ namespace FamilyTree.Controllers
         }
 
         [HttpDelete]
+        [Authorize("Admin")]
         public IActionResult Delete(int id)
         {
             _userService.EntryType = enmEntryType.D;

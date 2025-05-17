@@ -23,17 +23,26 @@ public class User
     [Column(TypeName = "varchar(100)")]
     public string? Username { get; set; }
 
+
     /// <summary>
     /// Password
     /// </summary>
     [Required]
-    [StringLength(100)]
-    [Column(TypeName = "varchar(100)")]
+    [StringLength(25)]
+    [NotMapped]
     public string? Password { get; set; }
+
+    /// <summary>
+    /// PasswordHash
+    /// </summary>
+    [StringLength(250)]
+    [Column(TypeName = "varchar(250)")]
+    public string? PasswordHash { get; set; }
 
     /// <summary>
     /// User Role Id
     /// </summary>
+    [Required]
     public int UserRoleId { get; set; } = 0;
 
     /// <summary>

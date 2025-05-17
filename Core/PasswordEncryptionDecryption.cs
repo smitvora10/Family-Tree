@@ -1,5 +1,4 @@
-﻿using BCrypt.Net;
-namespace FamilyTree.Core
+﻿namespace FamilyTree.Core
 {
     public static class PasswordEncryptionDecryption
     {

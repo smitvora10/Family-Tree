@@ -45,6 +45,19 @@ namespace FamilyTree.Controllers
         }
 
         [HttpPut]
+        public async Task<IActionResult> Update(Request entity)
+        {
+            _requestService.EntryType = enmEntryType.E;
+            objResponse = _requestService.ValidationBeforePreSave(entity);
+            if (!objResponse.IsError)
+            {
+                _requestService.Presave(entity);
+                objResponse = _requestService.AddOrUpdate();
+            }
+            return Ok(_requestService.AddOrUpdate());
+        }
+
+        [HttpPost("ApproveRequest")]
         public IActionResult ApproveRequest(int requestId, enmApprovalStatus ApprovalStatus = enmApprovalStatus.A)
         {
             _requestService.ApprovalStatus = ApprovalStatus;

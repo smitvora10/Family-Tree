@@ -42,14 +42,12 @@ public class Request
     /// <summary>
     /// Creation Datetime
     /// </summary>
-    [NotMapped]
     [Column(TypeName = "DATETIME")]
     public DateTime CreationDatetime { get; set; }
 
     /// <summary>
     /// Approved Datetime
     /// </summary>
-    [NotMapped]
     [Column(TypeName = "DATETIME")]
     public DateTime ApprovedDatetime { get; set; }
 }

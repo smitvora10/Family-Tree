@@ -19,6 +19,13 @@ namespace FamilyTree.BL.Services
         }
 
 
+        public override void Presave(User entity)
+        {
+            base.Presave(entity);
+
+            _entity.PasswordHash = PasswordEncryptionDecryption.HashPassword(entity.Password);
+        }
+
         public override Response ValidationBeforePreSave(User user)
         {
             Response objResponse = new Response();

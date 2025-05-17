@@ -9,6 +9,7 @@
             {MessageCode.E003,"No Request Exists for the corresponding Id."},
             {MessageCode.E004,"Request already Approved"},
             {MessageCode.E005,"Request already Rejected"},
+            {MessageCode.E006,"Invalid Login Credentials"},
         };
     }
 
@@ -38,5 +39,10 @@
         /// Request already Rejected
         /// </summary>
         E005,
+
+        /// <summary>
+        /// Invalid Login Credentials
+        /// </summary>
+        E006,
     }
 }

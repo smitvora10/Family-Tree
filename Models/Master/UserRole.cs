@@ -36,11 +36,6 @@ public class UserRole
     public string IsSuperUserRole { get; set; } = "N";
 
     /// <summary>
-    /// last Updated User Id
-    /// </summary>
-    public int LastUpdatedUserId { get; set; } = 0;
-
-    /// <summary>
     /// Creation Datetime
     /// </summary>
     [Column(TypeName = "DATETIME")]

@@ -161,4 +161,9 @@ public class Person
     /// Image Blob field
     /// </summary>
     public byte[] Image { get; set; } = null;  // This is the BLOB field
+
+    /// <summary>
+    /// Town (Mur gaam)
+    /// </summary>
+    public string Town = null;
 }

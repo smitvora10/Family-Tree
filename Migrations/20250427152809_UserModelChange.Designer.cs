@@ -4,6 +4,7 @@ using FamilyTree.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FamilyTree.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20250427152809_UserModelChange")]
+    partial class UserModelChange
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -259,6 +262,7 @@ namespace FamilyTree.Migrations
                         .HasColumnType("DATETIME");
 
                     b.Property<string>("PasswordHash")
+                        .IsRequired()
                         .HasMaxLength(250)
                         .HasColumnType("varchar(250)");
 
@@ -287,6 +291,9 @@ namespace FamilyTree.Migrations
                         .IsRequired()
                         .HasMaxLength(1)
                         .HasColumnType("char(1)");
+
+                    b.Property<int>("LastUpdatedUserId")
+                        .HasColumnType("int");
 
                     b.Property<string>("RoleActivityIds")
                         .HasColumnType("longtext");
