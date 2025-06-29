@@ -9,8 +9,9 @@ namespace FamilyTree.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+
     public class CLUserController : ControllerBase
-    {
+    {  
         Response objResponse = new Response();
 
         private readonly IUserService _userService;
@@ -20,6 +21,7 @@ namespace FamilyTree.Controllers
         }
 
         [HttpGet("GetAll")]
+        [Authorize("Admin")]
         public IActionResult GetAll()
         {
             return Ok(_userService.GetAll());

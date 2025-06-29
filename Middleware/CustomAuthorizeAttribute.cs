@@ -68,10 +68,7 @@ public class CustomAuthorizeFilter : Attribute, IAuthorizationFilter
             _ => "Unknown"
         };
 
-        if (_roles.Length == 0)
-            return;
-
-        if (roleName == "Admin")
+        if (_roles.Length == 0 || roleName == "Admin")
             return;
 
         if (!_roles.Contains(roleName, StringComparer.OrdinalIgnoreCase))

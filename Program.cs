@@ -1,4 +1,4 @@
-using FamilyTree.BL.Services;
+﻿using FamilyTree.BL.Services;
 using FamilyTree.Data;
 using FamilyTree.Extensions;
 using Microsoft.EntityFrameworkCore;
@@ -10,6 +10,27 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddServices();
+
+//// 👇 Add JWT authentication
+//builder.Services.AddAuthentication(options =>
+//{
+//    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+//    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+//    options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+//})
+//.AddJwtBearer(options =>
+//{
+//    options.TokenValidationParameters = new TokenValidationParameters
+//    {
+//        ValidateIssuer = true,
+//        ValidateAudience = true,
+//        ValidateLifetime = true,
+//        ValidateIssuerSigningKey = true,
+//        ValidIssuer = "your_issuer", // 👈 Use same issuer as in token creation
+//        ValidAudience = "your_audience",
+//        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("your_secret_key_here"))
+//    };
+//});
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -25,10 +46,13 @@ builder.Services.AddDbContext<DataContext>(options =>
  options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)));
 
 
-// Register custom authorize filter globally
+// Register controllers with global authorization filter
+// This will apply authorization to all endpoints by default
 builder.Services.AddControllers(options =>
 {
-    options.Filters.Add(new AuthorizeAttribute());  // This adds the custom authorize globally.
+    // Add global filter that will authorize all endpoints
+    // Empty roles array means any authenticated user can access
+    options.Filters.Add(new AuthorizeAttribute(new string[] {"Admin"}));
 });
 
 // Read the key from configuration
@@ -40,7 +64,7 @@ builder.Services.AddAuthorization();
 
 builder.Services.AddSwaggerGen(c =>
 {
-    c.SwaggerDoc("v1", new OpenApiInfo { Title = "Your API Title", Version = "v1" });
+    c.SwaggerDoc("v1", new OpenApiInfo { Title = "Family Tree", Version = "v1" });
 
     // Add JWT Authentication
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
@@ -90,6 +114,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+//app.UseAuthentication();
 app.UseAuthorization();
 
 app.UseRouting();
