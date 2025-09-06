@@ -83,10 +83,11 @@ namespace FamilyTree.BL.Services
             return response;
         }
 
-        public override void Presave(Request entity)
+        public void Presave(DTORequest entity)
         {
-            base.Presave(entity);
-            entity.Person = JsonConvert.SerializeObject(entity.Person);
+            objRequest.Action = entity.Action;
+            objRequest.Person = entity.Person;
+            base.Presave(objRequest);
         }
     }
 }

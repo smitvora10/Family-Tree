@@ -46,7 +46,7 @@ namespace FamilyTree.Controllers
                 _personService.Presave(entity);
                 objResponse = _personService.AddOrUpdate();
             }
-            return Ok(_personService.AddOrUpdate());
+            return Ok(objResponse);
         }
 
         [HttpPut]
@@ -59,7 +59,7 @@ namespace FamilyTree.Controllers
                 _personService.Presave(entity);
                 objResponse = _personService.AddOrUpdate();
             }
-            return Ok(_personService.AddOrUpdate());
+            return Ok(objResponse);
         }
 
         [HttpDelete]

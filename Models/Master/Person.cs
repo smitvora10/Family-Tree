@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 
 namespace FamilyTree.Models.Master;
 
@@ -39,13 +40,11 @@ public class Person
     /// <summary>
     /// Father (Person) - Id
     /// </summary>
-    [Required]
     public int FatherId { get; set; }
 
     /// <summary>
     /// Mother (Person) - Id
     /// </summary>
-    [Required]
     public int MotherId { get; set; }
 
     /// <summary>
@@ -139,28 +138,32 @@ public class Person
     [NotMapped]
     public List<Person> Children { get; set; } = new List<Person>();
 
-    /// <summary>
-    /// Mother Prop not to be added in DB
-    /// </summary>
-    [NotMapped]
-    public Person Mother { get; set; } = null;
+    ///// <summary>
+    ///// Mother Prop not to be added in DB
+    ///// </summary>
+    //[NotMapped]
+    //[JsonIgnore]
+    //public Person Mother { get; set; } = null;
 
-    /// <summary>
-    /// Father Prop not to be added in DB
-    /// </summary>
-    [NotMapped]
-    public Person Father { get; set; } = null;
+    ///// <summary>
+    ///// Father Prop not to be added in DB
+    ///// </summary>
+    //[NotMapped]
+    //[JsonIgnore]
+    //public Person Father { get; set; } = null;
 
-    /// <summary>
-    /// Father Prop not to be added in DB
-    /// </summary>
-    [NotMapped]
-    public Person? Spouse { get; set; } = null;
+    ///// <summary>
+    ///// Father Prop not to be added in DB
+    ///// </summary>
+    //[NotMapped]
+    //[JsonIgnore]
+    //public Person? Spouse { get; set; } = null;
 
-    /// <summary>
-    /// Image Blob field
-    /// </summary>
-    public byte[] Image { get; set; } = null;  // This is the BLOB field
+    ///// <summary>
+    ///// Image Blob field
+    ///// </summary>
+    //[JsonIgnore]
+    //public byte[] Image { get; set; } = null;  // This is the BLOB field
 
     /// <summary>
     /// Town (Mur gaam)

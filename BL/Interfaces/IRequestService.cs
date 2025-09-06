@@ -4,7 +4,7 @@ using FamilyTree.Models.Master;
 
 namespace FamilyTree.BL.Services
 {
-    public interface IRequestService : IBaseService<Request>
+    public interface IRequestService : IBaseService<DTORequest>
     {
         public enmApprovalStatus ApprovalStatus { get; set; }
         Response PreApproveRequest(int requestiId);

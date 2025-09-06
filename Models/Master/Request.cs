@@ -10,7 +10,7 @@ namespace FamilyTree.Models.Master;
 public class Request
 {
     /// <summary>
-    /// Relation Type Id
+    /// Request Id
     /// </summary>
     [Key]
     public int RequestId { get; set; }
@@ -37,7 +37,7 @@ public class Request
     /// <summary>
     /// Action A/E/D
     /// </summary>
-    public enmEntryType Action = enmEntryType.E;
+    public enmEntryType Action = enmEntryType.A;
 
     /// <summary>
     /// Creation Datetime
@@ -51,3 +51,21 @@ public class Request
     [Column(TypeName = "DATETIME")]
     public DateTime ApprovedDatetime { get; set; }
 }
+
+public class DTORequest
+{
+        /// <summary>
+    /// Person Json For Req.
+    /// </summary>
+    [Required]
+    public string Person { get; set; }
+
+
+    /// <summary>
+    /// Action A/E/D
+    /// </summary>
+    public enmEntryType Action = enmEntryType.A;
+
+}
+
+

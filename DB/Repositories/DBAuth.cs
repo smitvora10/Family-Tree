@@ -21,7 +21,7 @@ namespace FamilyTree.BL.Services
         public Response ValidateUser(LoginRequest request)
         {
             User objUser = _dbSet
-             .Single(x => x.Username == request.Username);
+             .FirstOrDefault(x => x.Username == request.Username);
 
             if (objUser != null && PasswordEncryptionDecryption.VerifyPassword(request.Password, objUser.PasswordHash))
             {

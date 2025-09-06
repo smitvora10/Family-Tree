@@ -32,7 +32,7 @@ namespace FamilyTree.Controllers
 
 
         [HttpPost]
-        public IActionResult Create(Request entity)
+        public IActionResult Create(DTORequest entity)
         {
             _requestService.EntryType = enmEntryType.A;
             objResponse = _requestService.ValidationBeforePreSave(entity);
@@ -45,7 +45,7 @@ namespace FamilyTree.Controllers
         }
 
         [HttpPut]
-        public async Task<IActionResult> Update(Request entity)
+        public async Task<IActionResult> Update(DTORequest entity)
         {
             _requestService.EntryType = enmEntryType.E;
             objResponse = _requestService.ValidationBeforePreSave(entity);
@@ -61,10 +61,10 @@ namespace FamilyTree.Controllers
         public IActionResult ApproveRequest(int requestId, enmApprovalStatus ApprovalStatus = enmApprovalStatus.A)
         {
             _requestService.ApprovalStatus = ApprovalStatus;
-            objResponse = _requestService. PreApproveRequest (requestId);
+            objResponse = _requestService.PreApproveRequest(requestId);
             if (!objResponse.IsError)
             {
-                _requestService.Presave((Request)objResponse.DataModel);
+                _requestService.Presave((DTORequest)objResponse.DataModel);
                 objResponse = _requestService.ApproveRequest();
             }
             return Ok(objResponse);

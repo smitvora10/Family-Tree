@@ -18,62 +18,38 @@ public class CustomAuthorizeFilter : Attribute, IAuthorizationFilter
 
     public void OnAuthorization(AuthorizationFilterContext context)
     {
-        bool allowAnonymous = context.ActionDescriptor.EndpointMetadata
-            .OfType<AllowAnonymousAttribute>().Any();
-
-        if (allowAnonymous)
+        if (context.ActionDescriptor.EndpointMetadata.OfType<AllowAnonymousAttribute>().Any())
             return;
 
-        HttpRequest request = context.HttpContext.Request;
-        string? authHeader = request.Headers["Authorization"].FirstOrDefault();
-
-        if (authHeader == null || !authHeader.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase))
+        var authHeader = context.HttpContext.Request.Headers["Authorization"].FirstOrDefault();
+        if (string.IsNullOrEmpty(authHeader) || !authHeader.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase))
         {
             context.Result = new UnauthorizedResult();
             return;
         }
 
         string token = authHeader.Substring("Bearer ".Length).Trim();
-
-        int userId;
-        int roleId;
-
         try
         {
-            ITokenService tokenService = context.HttpContext.RequestServices.GetRequiredService<ITokenService>();
-            (userId, roleId) = tokenService.ValidateToken(token);
-
+            var tokenService = context.HttpContext.RequestServices.GetRequiredService<ITokenService>();
+            var (userId, roleId) = tokenService.ValidateToken(token);
             context.HttpContext.Items["UserId"] = userId;
             context.HttpContext.Items["RoleId"] = roleId;
+
+            string roleName = roleId switch
+            {
+                1 => "Admin",
+                2 => "Member",
+                _ => throw new UnauthorizedAccessException("Invalid role")
+            };
+
+            bool isAuthorized = _roles.Length == 0 ? roleName == "Admin" : _roles.Contains(roleName, StringComparer.OrdinalIgnoreCase);
+            if (!isAuthorized)
+                context.Result = new ForbidResult();
         }
         catch
         {
             context.Result = new UnauthorizedResult();
-            return;
-        }
-
-        int userIdObj = Convert.ToInt32(context.HttpContext.Items["UserId"]);
-        int roleIdObj = Convert.ToInt32(context.HttpContext.Items["RoleId"]);
-
-        if (userIdObj != userId || roleIdObj != roleId)
-        {
-            context.Result = new UnauthorizedResult();
-            return;
-        }
-
-        string roleName = roleId switch
-        {
-            1 => "Admin",
-            2 => "Member",
-            _ => "Unknown"
-        };
-
-        if (_roles.Length == 0 || roleName == "Admin")
-            return;
-
-        if (!_roles.Contains(roleName, StringComparer.OrdinalIgnoreCase))
-        {
-            context.Result = new ForbidResult();
         }
     }
 }
