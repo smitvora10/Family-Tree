@@ -27,11 +27,15 @@ namespace FamilyTree.BL.Services
             _dbSet = context.Set<Request>();
         }
 
-        public override Response GetAll()
+        public override Response GetAll(string[]? includeFields = null, string[]? excludeFields = null)
         {
-            List<Request> lstRequest = _dbContext.GetAll();
-            return response;
+            List<Request> lstRequest = _dbContext.GetAll(includeFields, excludeFields)
+                .OfType<Request>()
+                .ToList();
 
+            response.DataModel = lstRequest;
+            // If you need to use lstRequest, do so here.
+            return response;
         }
         public Response ApproveRequest()
         {
@@ -40,6 +44,7 @@ namespace FamilyTree.BL.Services
             response = _personService.ValidationBeforePreSave(objPerson);
             if (!response.IsError)
             {
+                
                 response = _personService.AddOrUpdate();
                 objRequest.ApprovalStatus = enmApprovalStatus.A.ToString();
                 //Update Approval Status
@@ -85,9 +90,15 @@ namespace FamilyTree.BL.Services
 
         public void Presave(DTORequest entity)
         {
+            objRequest = new Request();
             objRequest.Action = entity.Action;
-            objRequest.Person = entity.Person;
+            objRequest.Person = JsonConvert.SerializeObject(entity.Person);
             base.Presave(objRequest);
+        }
+
+        public Response ValidationBeforePreSave(DTORequest entity)
+        {
+            return response;
         }
     }
 }

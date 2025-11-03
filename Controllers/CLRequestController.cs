@@ -27,12 +27,12 @@ namespace FamilyTree.Controllers
         [HttpGet("GetById")]
         public IActionResult GetById(int id)
         {
-            return Ok(_requestService.EntityExists(id));
+            return Ok(_requestService.GetById(id));
         }
 
 
         [HttpPost]
-        public IActionResult Create(DTORequest entity)
+        public IActionResult Create([FromBody] DTORequest entity)
         {
             _requestService.EntryType = enmEntryType.A;
             objResponse = _requestService.ValidationBeforePreSave(entity);
@@ -41,7 +41,7 @@ namespace FamilyTree.Controllers
                 _requestService.Presave(entity);
                 objResponse = _requestService.AddOrUpdate();
             }
-            return Ok(_requestService.AddOrUpdate());
+            return Ok(objResponse);
         }
 
         [HttpPut]
@@ -64,7 +64,6 @@ namespace FamilyTree.Controllers
             objResponse = _requestService.PreApproveRequest(requestId);
             if (!objResponse.IsError)
             {
-                _requestService.Presave((DTORequest)objResponse.DataModel);
                 objResponse = _requestService.ApproveRequest();
             }
             return Ok(objResponse);

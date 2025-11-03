@@ -40,4 +40,17 @@
         /// </summary>
         E,
     }
+
+    public enum enmUserRoles
+    {
+        /// <summary>
+        /// Admin
+        /// </summary>
+        A,
+
+        /// <summary>
+        /// Member
+        /// </summary>
+        M,
+    }
 }

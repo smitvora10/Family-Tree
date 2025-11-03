@@ -58,7 +58,7 @@ public class DTORequest
     /// Person Json For Req.
     /// </summary>
     [Required]
-    public string Person { get; set; }
+    public Person Person { get; set; }
 
 
     /// <summary>

@@ -43,9 +43,10 @@ public class CustomAuthorizeFilter : Attribute, IAuthorizationFilter
                 _ => throw new UnauthorizedAccessException("Invalid role")
             };
 
-            bool isAuthorized = _roles.Length == 0 ? roleName == "Admin" : _roles.Contains(roleName, StringComparer.OrdinalIgnoreCase);
+            //If no role given in APi then considered for admin role only if rolename given then checked for it
+            bool isAuthorized = _roles.Length == 0 || roleName == "Admin" || _roles.Contains(roleName, StringComparer.OrdinalIgnoreCase);
             if (!isAuthorized)
-                context.Result = new ForbidResult();
+                context.Result = new UnauthorizedResult();
         }
         catch
         {

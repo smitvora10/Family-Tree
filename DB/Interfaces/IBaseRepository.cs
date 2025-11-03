@@ -16,7 +16,7 @@ namespace FamilyTree.BL.Services
         /// Get All Records
         /// </summary>
         /// <returns></returns>
-        List<TEntity> GetAll();
+        List<dynamic> GetAll(string[]? includeFields = null, string[]? excludeFields = null);
 
         /// <summary>
         /// Get Data By Id

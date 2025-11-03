@@ -18,6 +18,7 @@ namespace FamilyTree.Controllers
             _occupationService = occupationService;
         }
 
+        [Authorize("Member")]
         [HttpGet("GetAll")]
         public IActionResult GetAll()
         {
@@ -27,7 +28,7 @@ namespace FamilyTree.Controllers
         [HttpGet("GetById")]
         public IActionResult GetById(int id)
         {
-            return Ok(_occupationService.EntityExists(id));
+            return Ok(_occupationService.GetById(id));
         }
 
         [HttpPost]

@@ -27,7 +27,7 @@ namespace FamilyTree.Controllers
         [HttpGet("GetById")]
         public IActionResult GetById(int id)
         {
-            return Ok(_personService.EntityExists(id));
+            return Ok(_personService.GetById(id));
         }
 
         [HttpGet("GetWholeTree")]

@@ -30,7 +30,7 @@ namespace FamilyTree.Controllers
         [HttpGet("GetById")]
         public IActionResult GetById(int id)
         {
-            return Ok(_userService.EntityExists(id));
+            return Ok(_userService.GetById(id));
         }
 
         [HttpPost]

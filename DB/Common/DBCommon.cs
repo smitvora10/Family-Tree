@@ -1,6 +1,7 @@
 ﻿using FamilyTree.BL.Services;
 using Microsoft.EntityFrameworkCore;
 using System.Data;
+using System.Linq.Dynamic.Core;
 
 namespace FamilyTree.Data.Common
 {
@@ -15,9 +16,52 @@ namespace FamilyTree.Data.Common
             _dbSet = context.Set<TEntity>();
         }
 
-        public List<TEntity> GetAll()
+        // ---------- COMMON HELPER ----------
+        private List<string> BuildFieldList(string[]? includeFields, string[]? excludeFields)
         {
-            return _dbSet.ToList();
+            var allProps = typeof(TEntity).GetProperties()
+                .Select(p => p.Name)
+                .ToList();
+
+            if (includeFields != null && includeFields.Length > 0)
+                allProps = allProps.Intersect(includeFields, StringComparer.OrdinalIgnoreCase).ToList();
+            else if (excludeFields != null && excludeFields.Length > 0)
+                allProps = allProps.Except(excludeFields, StringComparer.OrdinalIgnoreCase).ToList();
+
+            return allProps;
+        }
+
+        //public List<TEntity> GetAll(string[]? includeFields = null, string[]? excludeFields = null)
+        //{
+        //    IQueryable<TEntity> query = _dbSet.AsNoTracking();
+        //    var fieldList = BuildFieldList(includeFields, excludeFields);
+
+        //    // If no filtering, return all
+        //    if (fieldList == null || fieldList.Count == 0)
+        //        return query.ToList();
+
+        //    // Dynamic projection using System.Linq.Dynamic.Core
+        //    string selector = $"new({string.Join(",", fieldList)})";
+        //    // Fix: Use System.Linq.Dynamic.Core's Select extension method, which returns dynamic objects.
+        //    // Cast result to List<dynamic> instead of List<TEntity>
+        //    return _dbSet.Select(selector).ToDynamicList();
+        //}
+
+        // --------------------- GET ALL ---------------------
+        public List<dynamic> GetAll(string[]? includeFields = null, string[]? excludeFields = null)
+        {
+            IQueryable<TEntity> query = _dbSet.AsNoTracking();
+            var fieldList = BuildFieldList(includeFields, excludeFields);
+
+            // If no filtering, return everything
+            if (fieldList == null || fieldList.Count == 0)
+                return query.ToDynamicList();
+
+            // Build selector string for dynamic LINQ
+            string selector = $"new({string.Join(",", fieldList)})";
+
+            // ✅ Use System.Linq.Dynamic.Core extension
+            return query.Select(selector).ToDynamicList();
         }
 
         public TEntity GetById(int id)

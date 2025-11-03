@@ -19,7 +19,7 @@ namespace FamilyTree.BL.Services
         /// Get All Records
         /// </summary>
         /// <returns></returns>
-        Response GetAll();
+        Response GetAll(string[]? includeFields = null, string[]? excludeFields = null);
 
         /// <summary>
         /// Get Data By Id
