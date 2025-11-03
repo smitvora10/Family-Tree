@@ -1,6 +1,7 @@
-﻿using FamilyTree.BL.Services;
+using FamilyTree.BL.Services;
 using FamilyTree.Data;
 using FamilyTree.Extensions;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OpenApi.Models;
@@ -28,19 +29,21 @@ builder.Services.AddServices();
 //        };
 //    });
 
-// Configure JSON serialization to use PascalCase
-builder.Services.AddControllers()
-    .AddJsonOptions(options =>
-    {
-        // Remove the default camelCase naming policy
-        options.JsonSerializerOptions.PropertyNamingPolicy = null;
-        options.JsonSerializerOptions.DictionaryKeyPolicy = null;
-    });
+// Configure MVC controllers and JSON serialization to use PascalCase
+var mvcBuilder = builder.Services.AddControllers(options =>
+{
+    // Add global filter that will authorize all endpoints
+    // Empty roles array means any authenticated user can access
+    options.Filters.Add(new AuthorizeAttribute(new string[] { "Admin" }));
+});
 
-builder.Services.AddControllers()
-    .AddJsonOptions(o => o.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
-
-builder.Services.AddControllers();
+mvcBuilder.AddJsonOptions(options =>
+{
+    // Remove the default camelCase naming policy
+    options.JsonSerializerOptions.PropertyNamingPolicy = null;
+    options.JsonSerializerOptions.DictionaryKeyPolicy = null;
+    options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+});
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -53,15 +56,6 @@ string connectionString = configuration.GetConnectionString("Default");
 builder.Services.AddDbContext<DataContext>(options =>
  options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)));
 
-
-// Register controllers with global authorization filter
-// This will apply authorization to all endpoints by default
-builder.Services.AddControllers(options =>
-{
-    // Add global filter that will authorize all endpoints
-    // Empty roles array means any authenticated user can access
-    options.Filters.Add(new AuthorizeAttribute(new string[] {"Admin"}));
-});
 
 // Read the key from configuration
 var secretKey = builder.Configuration["JwtSettings:Key"];
