@@ -23,27 +23,9 @@ namespace FamilyTree.BL.Services
 
 
         // ---------- COMMON HELPER ----------
-        private List<string> BuildFieldList(string[]? includeFields, string[]? excludeFields)
-        {
-            var allProps = typeof(TEntity).GetProperties()
-                .Select(p => p.Name)
-                .ToList();
-
-            if (includeFields != null && includeFields.Length > 0)
-                allProps = allProps.Intersect(includeFields, StringComparer.OrdinalIgnoreCase).ToList();
-            else if (excludeFields != null && excludeFields.Length > 0)
-                allProps = allProps.Except(excludeFields, StringComparer.OrdinalIgnoreCase).ToList();
-
-            return allProps;
-        }
-
-
         public virtual Response GetAll(string[]? includeFields = null, string[]? excludeFields = null)
         {
-            var fieldList = BuildFieldList(includeFields, excludeFields);
-            var selector = $"new({string.Join(",", fieldList)})";
-
-            response.DataModel = _dbContext.GetAll();
+            response.DataModel = _dbContext.GetAll(includeFields, excludeFields);
             return response;
         }
 

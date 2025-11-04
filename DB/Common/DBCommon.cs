@@ -17,18 +17,19 @@ namespace FamilyTree.Data.Common
         }
 
         // ---------- COMMON HELPER ----------
-        private List<string> BuildFieldList(string[]? includeFields, string[]? excludeFields)
+        private List<string>? BuildFieldList(string[]? includeFields, string[]? excludeFields)
         {
             var allProps = typeof(TEntity).GetProperties()
                 .Select(p => p.Name)
                 .ToList();
 
             if (includeFields != null && includeFields.Length > 0)
-                allProps = allProps.Intersect(includeFields, StringComparer.OrdinalIgnoreCase).ToList();
-            else if (excludeFields != null && excludeFields.Length > 0)
-                allProps = allProps.Except(excludeFields, StringComparer.OrdinalIgnoreCase).ToList();
+                return allProps.Intersect(includeFields, StringComparer.OrdinalIgnoreCase).ToList();
 
-            return allProps;
+            if (excludeFields != null && excludeFields.Length > 0)
+                return allProps.Except(excludeFields, StringComparer.OrdinalIgnoreCase).ToList();
+
+            return null;
         }
 
         //public List<TEntity> GetAll(string[]? includeFields = null, string[]? excludeFields = null)
@@ -54,8 +55,11 @@ namespace FamilyTree.Data.Common
             var fieldList = BuildFieldList(includeFields, excludeFields);
 
             // If no filtering, return everything
-            if (fieldList == null || fieldList.Count == 0)
-                return query.ToDynamicList();
+            if (fieldList == null)
+                return query.ToList().Cast<dynamic>().ToList();
+
+            if (fieldList.Count == 0)
+                return new List<dynamic>();
 
             // Build selector string for dynamic LINQ
             string selector = $"new({string.Join(",", fieldList)})";

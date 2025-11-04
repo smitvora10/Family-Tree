@@ -29,12 +29,17 @@ namespace FamilyTree.BL.Services
 
         public override Response GetAll(string[]? includeFields = null, string[]? excludeFields = null)
         {
-            List<Request> lstRequest = _dbContext.GetAll(includeFields, excludeFields)
-                .OfType<Request>()
-                .ToList();
+            var result = _dbContext.GetAll(includeFields, excludeFields);
 
-            response.DataModel = lstRequest;
-            // If you need to use lstRequest, do so here.
+            if ((includeFields == null || includeFields.Length == 0) && (excludeFields == null || excludeFields.Length == 0))
+            {
+                response.DataModel = result.OfType<Request>().ToList();
+            }
+            else
+            {
+                response.DataModel = result;
+            }
+
             return response;
         }
         public Response ApproveRequest()
