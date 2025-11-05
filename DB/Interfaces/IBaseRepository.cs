@@ -19,6 +19,15 @@ namespace FamilyTree.BL.Services
         List<dynamic> GetAll(string[]? includeFields = null, string[]? excludeFields = null);
 
         /// <summary>
+        /// Checks if an entity with matching key fields already exists.
+        /// </summary>
+        /// <param name="tableName">Name of the table/model that should be queried.</param>
+        /// <param name="entity">Entity whose values are used to search for duplicates.</param>
+        /// <param name="keyFields">One or more fields whose combination must be unique.</param>
+        /// <returns>True when a matching record exists; otherwise false.</returns>
+        bool HasDuplicate(string tableName, TEntity entity, params string[] keyFields);
+
+        /// <summary>
         /// Get Data By Id
         /// </summary>
         /// <param name="id"></param>
