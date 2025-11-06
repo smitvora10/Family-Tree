@@ -49,7 +49,7 @@ namespace FamilyTree.BL.Services
             response = _personService.ValidationBeforePreSave(objPerson);
             if (!response.IsError)
             {
-                
+                _personService.Presave(objPerson);
                 response = _personService.AddOrUpdate();
                 objRequest.ApprovalStatus = enmApprovalStatus.A.ToString();
                 //Update Approval Status

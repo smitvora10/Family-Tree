@@ -46,7 +46,7 @@ namespace FamilyTree.Controllers
                 _personService.Presave(entity);
                 objResponse = _personService.AddOrUpdate();
             }
-            return Ok(objResponse);
+            return Ok(objResponse)  ;
         }
 
         [HttpPut]
