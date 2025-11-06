@@ -1,12 +1,43 @@
 ﻿using FamilyTree.BL.Services;
+using System;
 using Microsoft.EntityFrameworkCore;
 using System.Data;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Linq;
 using System.Linq.Dynamic.Core;
+using System.Reflection;
 
 namespace FamilyTree.Data.Common
 {
     public class DBCommon<TEntity> : IBaseRepository<TEntity> where TEntity : class
     {
+        private static readonly ConcurrentDictionary<Type, IReadOnlyDictionary<string, PropertyInfo>> _propertyCache = new();
+        private static readonly ConcurrentDictionary<Type, PropertyInfo?> _idPropertyCache = new();
+
+        private static IReadOnlyDictionary<string, PropertyInfo> GetPropertyMap(Type type)
+        {
+            return _propertyCache.GetOrAdd(type, static t =>
+                t.GetProperties(BindingFlags.Public | BindingFlags.Instance)
+                    .ToDictionary(p => p.Name, p => p, StringComparer.OrdinalIgnoreCase));
+        }
+
+        private static PropertyInfo? GetIdProperty(Type type)
+        {
+            return _idPropertyCache.GetOrAdd(type, static t =>
+            {
+                var properties = GetPropertyMap(t);
+
+                if (properties.TryGetValue("Id", out var idProp))
+                {
+                    return idProp;
+                }
+
+                properties.TryGetValue($"{t.Name}Id", out var namedIdProp);
+                return namedIdProp;
+            });
+        }
+
         private readonly DbSet<TEntity> _dbSet;
         private readonly DataContext _context;
 
@@ -66,6 +97,81 @@ namespace FamilyTree.Data.Common
 
             // ✅ Use System.Linq.Dynamic.Core extension
             return query.Select(selector).ToDynamicList();
+        }
+
+
+
+        public bool HasDuplicate(string tableName, TEntity entity, params string[] keyFields)
+        {
+            if (string.IsNullOrWhiteSpace(tableName))
+                throw new ArgumentException("Table name must be provided.", nameof(tableName));
+
+            if (entity == null)
+                throw new ArgumentNullException(nameof(entity));
+
+            if (keyFields == null || keyFields.Length == 0)
+                throw new ArgumentException("At least one key field must be provided.", nameof(keyFields));
+
+            var entityType = typeof(TEntity);
+
+            if (!string.Equals(tableName, entityType.Name, StringComparison.OrdinalIgnoreCase))
+                throw new ArgumentException($"Table name '{tableName}' does not match entity type '{entityType.Name}'.", nameof(tableName));
+
+            var propertyMap = GetPropertyMap(entityType);
+            var comparisons = new List<string>();
+            var parameters = new List<object?>();
+
+            foreach (var field in keyFields)
+            {
+                if (string.IsNullOrWhiteSpace(field))
+                    throw new ArgumentException("Key field names cannot be null or whitespace.", nameof(keyFields));
+
+                if (!propertyMap.TryGetValue(field, out var property))
+                    throw new ArgumentException($"Property '{field}' was not found on type '{entityType.Name}'.", nameof(keyFields));
+
+                var value = property.GetValue(entity);
+
+                if (value == null)
+                {
+                    comparisons.Add($"{property.Name} == null");
+                }
+                else
+                {
+                    comparisons.Add($"{property.Name} == @{parameters.Count}");
+                    parameters.Add(value);
+                }
+            }
+
+            var idProperty = GetIdProperty(entityType);
+            if (idProperty != null)
+            {
+                var idValue = idProperty.GetValue(entity);
+                if (!IsDefaultValue(idValue, idProperty.PropertyType))
+                {
+                    comparisons.Add($"{idProperty.Name} != @{parameters.Count}");
+                    parameters.Add(idValue);
+                }
+            }
+
+            if (comparisons.Count == 0)
+                return false;
+
+            var predicate = string.Join(" AND ", comparisons);
+            return _dbSet.AsNoTracking().Where(predicate, parameters.ToArray()).Any();
+        }
+
+        private static bool IsDefaultValue(object? value, Type type)
+        {
+            if (value == null)
+                return true;
+
+            if (!type.IsValueType)
+                return false;
+
+            var underlying = Nullable.GetUnderlyingType(type) ?? type;
+            var defaultValue = Activator.CreateInstance(underlying);
+
+            return value.Equals(defaultValue);
         }
 
         public TEntity GetById(int id)

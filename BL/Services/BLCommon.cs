@@ -59,6 +59,17 @@ namespace FamilyTree.BL.Services
             return response;
         }
 
+        public virtual bool HasDuplicate(string tableName, TEntity entity, params string[] keyFields)
+        {
+            if (entity == null)
+                throw new ArgumentNullException(nameof(entity));
+
+            if (keyFields == null || keyFields.Length == 0)
+                throw new ArgumentException("At least one key field must be provided.", nameof(keyFields));
+
+            return _dbContext.HasDuplicate(tableName, entity, keyFields);
+        }
+
         public virtual Response Delete(int id)
         {
             if (EntityExists(id))

@@ -22,6 +22,16 @@ namespace FamilyTree.BL.Services
         Response GetAll(string[]? includeFields = null, string[]? excludeFields = null);
 
         /// <summary>
+        /// Checks whether the supplied entity has duplicate values for the provided fields
+        /// within the corresponding table.
+        /// </summary>
+        /// <param name="tableName">Name of the model/table to validate against.</param>
+        /// <param name="entity">Current entity instance whose values should be validated.</param>
+        /// <param name="keyFields">Fields that must be unique individually or in combination.</param>
+        /// <returns>True when a duplicate exists; otherwise false.</returns>
+        bool HasDuplicate(string tableName, TEntity entity, params string[] keyFields);
+
+        /// <summary>
         /// Get Data By Id
         /// </summary>
         /// <param name="id"></param>
