@@ -1,12 +1,10 @@
-﻿using FamilyTree.Core;
+using FamilyTree.Core;
 using FamilyTree.Data;
 using FamilyTree.DB.Interfaces;
 using FamilyTree.Models.Common;
 using FamilyTree.Models.Master;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
-using Org.BouncyCastle.Asn1.Ocsp;
-using System.Collections.Generic;
 using Request = FamilyTree.Models.Master.Request;
 
 namespace FamilyTree.BL.Services
@@ -15,8 +13,8 @@ namespace FamilyTree.BL.Services
     {
         private readonly IRequestRepository _dbContext;
         private readonly DbSet<Request> _dbSet;
-        private readonly DataContext _context;
         private readonly IPersonService _personService;
+
         public Request objRequest { get; set; }
         public enmApprovalStatus ApprovalStatus { get; set; }
 
@@ -29,19 +27,39 @@ namespace FamilyTree.BL.Services
 
         public override Response GetAll(string[]? includeFields = null, string[]? excludeFields = null)
         {
-            var result = _dbContext.GetAll(includeFields, excludeFields);
-
-            if ((includeFields == null || includeFields.Length == 0) && (excludeFields == null || excludeFields.Length == 0))
+            response = new Response
             {
-                response.DataModel = result.OfType<Request>().ToList();
-            }
-            else
-            {
-                response.DataModel = result;
-            }
+                Data = _dbContext.GetDetailedRequests()
+            };
 
             return response;
         }
+
+        public override Response GetById(int id)
+        {
+            response = new Response();
+
+            if (id == 0)
+            {
+                response.IsError = true;
+                response.MessageCode = MessageCode.E001.ToString();
+                return response;
+            }
+
+            var result = _dbContext.GetDetailedRequestById(id);
+
+            if (result == null || result.Rows.Count == 0)
+            {
+                response.IsError = true;
+                response.MessageCode = MessageCode.E001.ToString();
+                return response;
+            }
+
+            response.Data = result;
+
+            return response;
+        }
+
         public Response ApproveRequest()
         {
             Person objPerson = JsonConvert.DeserializeObject<Person>(objRequest.Person);
@@ -49,7 +67,7 @@ namespace FamilyTree.BL.Services
             response = _personService.ValidationBeforePreSave(objPerson);
             if (!response.IsError)
             {
-                
+
                 response = _personService.AddOrUpdate();
                 objRequest.ApprovalStatus = enmApprovalStatus.A.ToString();
                 //Update Approval Status
