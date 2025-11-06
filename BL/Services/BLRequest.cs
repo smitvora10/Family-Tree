@@ -67,11 +67,8 @@ namespace FamilyTree.BL.Services
             response = _personService.ValidationBeforePreSave(objPerson);
             if (!response.IsError)
             {
-<<<<<<< HEAD
                 _personService.Presave(objPerson);
-=======
 
->>>>>>> 5f76136a874bc80a0550604bcb190d23c7d2e7a3
                 response = _personService.AddOrUpdate();
                 objRequest.ApprovalStatus = enmApprovalStatus.A.ToString();
                 //Update Approval Status
