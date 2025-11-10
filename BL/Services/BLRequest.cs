@@ -124,5 +124,10 @@ namespace FamilyTree.BL.Services
         {
             return response;
         }
+
+        public bool HasDuplicate(string tableName, DTORequest entity, params string[] keyFields)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

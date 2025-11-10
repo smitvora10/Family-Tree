@@ -103,15 +103,6 @@ namespace FamilyTree.Data.Common
 
         public bool HasDuplicate(string tableName, TEntity entity, params string[] keyFields)
         {
-            if (string.IsNullOrWhiteSpace(tableName))
-                throw new ArgumentException("Table name must be provided.", nameof(tableName));
-
-            if (entity == null)
-                throw new ArgumentNullException(nameof(entity));
-
-            if (keyFields == null || keyFields.Length == 0)
-                throw new ArgumentException("At least one key field must be provided.", nameof(keyFields));
-
             var entityType = typeof(TEntity);
 
             if (!string.Equals(tableName, entityType.Name, StringComparison.OrdinalIgnoreCase))
