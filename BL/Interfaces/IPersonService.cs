@@ -8,5 +8,7 @@ namespace FamilyTree.BL.Services
         Response GetWholeTree();
 
         List<Person> BuildFamilyTree(Person currentPerson = null);
+
+        Response UploadImage(int personId, string? imageBase64);
     }
 }
