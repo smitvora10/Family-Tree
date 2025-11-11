@@ -57,8 +57,8 @@ namespace FamilyTree.Controllers
             return Ok(_requestService.AddOrUpdate());
         }
 
-        [HttpPost("ApproveRequest")]
-        public IActionResult ApproveRequest(int requestId, enmApprovalStatus ApprovalStatus = enmApprovalStatus.A)
+        [HttpPost("UpdateStatus")]
+        public IActionResult UpdateStatus(int requestId, enmApprovalStatus ApprovalStatus = enmApprovalStatus.A)
         {
             _requestService.ApprovalStatus = ApprovalStatus;
             objResponse = _requestService.PreApproveRequest(requestId);
