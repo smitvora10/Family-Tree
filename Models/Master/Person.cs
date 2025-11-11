@@ -166,6 +166,19 @@ public class Person
     //public byte[] Image { get; set; } = null;  // This is the BLOB field
 
     /// <summary>
+    /// Person image stored as binary.
+    /// </summary>
+    [Column(TypeName = "LONGBLOB")]
+    [JsonIgnore]
+    public byte[]? PersonImage { get; set; }
+
+    /// <summary>
+    /// Person image represented as a Base64 string for transport.
+    /// </summary>
+    [NotMapped]
+    public string? PersonImageBase64 { get; set; }
+
+    /// <summary>
     /// Town (Mur gaam)
     /// </summary>
     public string Town = null;

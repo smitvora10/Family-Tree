@@ -68,6 +68,19 @@ namespace FamilyTree.Controllers
             _personService.EntryType = enmEntryType.D;
             return Ok(_personService.Delete(id));
         }
+
+        [HttpPost("UploadImage")]
+        public IActionResult UploadImage([FromBody] UploadImageRequest request)
+        {
+            objResponse = _personService.UploadImage(request.PersonId, request.ImageBase64);
+            return Ok(objResponse);
+        }
+    }
+
+    public class UploadImageRequest
+    {
+        public int PersonId { get; set; }
+        public string? ImageBase64 { get; set; }
     }
 }
 
