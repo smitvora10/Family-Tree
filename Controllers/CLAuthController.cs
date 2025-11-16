@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 [ApiController]
-[Route("[controller]")]
+[Route("api/Auth")]
 public class CLAuthController : ControllerBase
 {
     private readonly ITokenService _tokenService;
@@ -14,6 +14,22 @@ public class CLAuthController : ControllerBase
     {
         _tokenService = tokenService;
         _authService = authService;
+    }
+
+    [HttpPost("register")]
+    [AllowAnonymous]
+    public IActionResult Register([FromBody] RegisterRequest registerRequest)
+    {
+        Response response = _authService.RegisterUser(registerRequest);
+        return Ok(response);
+    }
+
+    [HttpPost("verify-otp")]
+    [AllowAnonymous]
+    public IActionResult VerifyOtp([FromBody] VerifyOtpRequest verifyOtpRequest)
+    {
+        Response response = _authService.VerifyOtp(verifyOtpRequest);
+        return Ok(response);
     }
 
     [HttpPost("login")]
