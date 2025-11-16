@@ -257,6 +257,11 @@ namespace FamilyTree.Migrations
                     b.Property<DateTime?>("ModificationDatetime")
                         .HasColumnType("DATETIME");
 
+                    b.Property<string>("MobileNumber")
+                        .IsRequired()
+                        .HasMaxLength(15)
+                        .HasColumnType("varchar(15)");
+
                     b.Property<string>("PasswordHash")
                         .HasMaxLength(250)
                         .HasColumnType("varchar(250)");

@@ -23,6 +23,11 @@ public class User
     [Column(TypeName = "varchar(100)")]
     public string? Username { get; set; }
 
+    [Required]
+    [StringLength(15)]
+    [Column(TypeName = "varchar(15)")]
+    public string MobileNumber { get; set; } = string.Empty;
+
 
     /// <summary>
     /// Password

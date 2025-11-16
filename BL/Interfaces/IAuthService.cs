@@ -1,10 +1,11 @@
 ﻿using FamilyTree.Models.Common;
-using FamilyTree.Models.Master;
 
 namespace FamilyTree.BL.Services
 {
-    public interface IAuthService : IBaseService<User>
+    public interface IAuthService
     {
         public Response ValidateUser(LoginRequest request);
+        public Response RegisterUser(RegisterRequest request);
+        public Response VerifyOtp(VerifyOtpRequest request);
     }
 }
