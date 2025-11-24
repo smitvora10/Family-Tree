@@ -13,13 +13,15 @@ namespace FamilyTree.BL.Services
     {
         private readonly IAuthRepository _authRepository;
         private readonly IOtpService _otpService;
+        private readonly IEmailService _emailService;
         private readonly DbSet<User> _userSet;
 
-        public BLAuth(IAuthRepository authRepository, DataContext context, IOtpService otpService)
+        public BLAuth(IAuthRepository authRepository, DataContext context, IOtpService otpService, IEmailService emailService)
             : base(authRepository)
         {
             _authRepository = authRepository;
             _otpService = otpService;
+            _emailService = emailService;
             _userSet = context.Set<User>();
         }
 
@@ -61,16 +63,16 @@ namespace FamilyTree.BL.Services
                 return requestValidation;
             }
 
-            string normalizedMobile = NormalizeMobile(request.MobileNumber);
+            string normalizedEmail = NormalizeEmail(request.Email);
             string sanitizedOtp = request.OtpCode.Trim();
 
-            User? user = FindUserByMobile(normalizedMobile);
+            User? user = FindUserByEmail(normalizedEmail);
             if (user == null)
             {
                 return CreateErrorResponse(MessageCode.E010);
             }
 
-            Response otpValidation = ValidateAndConsumeOtp(normalizedMobile, sanitizedOtp);
+            Response otpValidation = ValidateAndConsumeOtp(normalizedEmail, sanitizedOtp);
             if (otpValidation.IsError)
             {
                 return otpValidation;
@@ -82,7 +84,7 @@ namespace FamilyTree.BL.Services
                 return persistenceResponse;
             }
 
-            return BuildOtpVerificationResponse(user.UserId, user.Username ?? string.Empty, normalizedMobile);
+            return BuildOtpVerificationResponse(user.UserId, user.Username ?? string.Empty, normalizedEmail);
         }
 
         public override Response ValidationBeforePreSave(User user)
@@ -106,11 +108,11 @@ namespace FamilyTree.BL.Services
                 return validationResponse;
             }
 
-            bool mobileExists = _userSet
+            bool emailExists = _userSet
                 .AsNoTracking()
-                .Any(existingUser => existingUser.MobileNumber == user.MobileNumber && existingUser.UserId != user.UserId);
+                .Any(existingUser => existingUser.Email == user.Email && existingUser.UserId != user.UserId);
 
-            if (mobileExists)
+            if (emailExists)
             {
                 validationResponse.IsError = true;
                 validationResponse.MessageCode = MessageCode.E007.ToString();
@@ -173,18 +175,18 @@ namespace FamilyTree.BL.Services
                 return failureResponse;
             }
 
-            Response otpDispatchResponse = DispatchOtp(createdUser.MobileNumber);
+            Response otpDispatchResponse = DispatchOtp(createdUser.Email);
             if (otpDispatchResponse.IsError)
             {
                 return otpDispatchResponse;
             }
 
             persistenceResponse.Id = createdUser.UserId;
-            persistenceResponse.Message = "Registration successful. OTP sent to the registered mobile number.";
+            persistenceResponse.Message = "Registration successful. OTP sent to the registered email address.";
             persistenceResponse.DataModel = new
             {
                 Username = createdUser.Username,
-                MobileNumber = createdUser.MobileNumber
+                Email = createdUser.Email
             };
 
             return persistenceResponse;
@@ -205,12 +207,12 @@ namespace FamilyTree.BL.Services
             return null;
         }
 
-        private Response DispatchOtp(string mobileNumber)
+        private Response DispatchOtp(string email)
         {
             Response otpResponse = new Response();
 
-            string sanitizedMobileNumber = NormalizeMobile(mobileNumber);
-            if (string.IsNullOrWhiteSpace(sanitizedMobileNumber))
+            string sanitizedEmail = NormalizeEmail(email);
+            if (string.IsNullOrWhiteSpace(sanitizedEmail))
             {
                 otpResponse.IsError = true;
                 otpResponse.MessageCode = MessageCode.E015.ToString();
@@ -219,9 +221,10 @@ namespace FamilyTree.BL.Services
 
             try
             {
-                _otpService.GenerateOtp(sanitizedMobileNumber);
+                string otpCode = _otpService.GenerateOtp(sanitizedEmail);
+                _emailService.SendOtpEmailAsync(sanitizedEmail, otpCode, 5).GetAwaiter().GetResult();
             }
-            catch (ArgumentException)
+            catch (Exception)
             {
                 otpResponse.IsError = true;
                 otpResponse.MessageCode = MessageCode.E015.ToString();
@@ -239,7 +242,7 @@ namespace FamilyTree.BL.Services
             return AddOrUpdate();
         }
 
-        private Response BuildOtpVerificationResponse(int userId, string username, string normalizedMobile)
+        private Response BuildOtpVerificationResponse(int userId, string username, string normalizedEmail)
         {
             Response verificationResponse = new Response
             {
@@ -248,7 +251,7 @@ namespace FamilyTree.BL.Services
                 DataModel = new
                 {
                     Username = username,
-                    MobileNumber = normalizedMobile,
+                    Email = normalizedEmail,
                     VerifiedAt = DateTime.UtcNow
                 }
             };
@@ -266,14 +269,14 @@ namespace FamilyTree.BL.Services
             return validationResponse;
         }
 
-        private User? FindUserByMobile(string normalizedMobile)
+        private User? FindUserByEmail(string normalizedEmail)
         {
-            return _userSet.FirstOrDefault(existingUser => existingUser.MobileNumber == normalizedMobile);
+            return _userSet.FirstOrDefault(existingUser => existingUser.Email == normalizedEmail);
         }
 
-        private Response ValidateAndConsumeOtp(string mobileNumber, string otpCode)
+        private Response ValidateAndConsumeOtp(string email, string otpCode)
         {
-            OtpVerification? otpRecord = _otpService.GetLatestOtp(mobileNumber);
+            OtpVerification? otpRecord = _otpService.GetLatestOtp(email);
             if (otpRecord == null)
             {
                 return CreateErrorResponse(MessageCode.E009);
@@ -303,20 +306,22 @@ namespace FamilyTree.BL.Services
         private static User BuildNewUser(RegisterRequest request)
         {
             string normalizedUsername = NormalizeUsername(request.Username);
-            string normalizedMobile = NormalizeMobile(request.MobileNumber);
+            string normalizedEmail = NormalizeEmail(request.Email);
+            string? sanitizedMobile = string.IsNullOrWhiteSpace(request.MobileNumber) ? null : request.MobileNumber.Trim();
             User newUser = new User
             {
                 Username = normalizedUsername,
-                MobileNumber = normalizedMobile,
+                Email = normalizedEmail,
+                MobileNumber = sanitizedMobile,
                 Password = request.Password.Trim(),
                 UserRoleId = request.UserRoleId
             };
             return newUser;
         }
 
-        private static string NormalizeMobile(string? mobileNumber)
+        private static string NormalizeEmail(string? email)
         {
-            return mobileNumber?.Trim() ?? string.Empty;
+            return email?.Trim().ToLowerInvariant() ?? string.Empty;
         }
 
         private static string NormalizeUsername(string? username)

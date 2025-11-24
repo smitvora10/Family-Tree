@@ -18,20 +18,29 @@ namespace FamilyTree.BL.Services
             _otpSet = context.Set<OtpVerification>();
         }
 
-        public string GenerateOtp(string mobileNumber)
+        public string GenerateOtp(string email)
         {
-            if (string.IsNullOrWhiteSpace(mobileNumber))
+            if (string.IsNullOrWhiteSpace(email))
             {
-                throw new ArgumentException("Mobile number is required.", nameof(mobileNumber));
+                throw new ArgumentException("Email is required.", nameof(email));
             }
 
-            string normalizedMobile = NormalizeMobile(mobileNumber);
+            string normalizedEmail = NormalizeEmail(email);
             string otpCode = RandomNumberGenerator.GetInt32(0, 1_000_000).ToString("D6");
             DateTime utcNow = DateTime.UtcNow;
 
+            IQueryable<OtpVerification> existingOtps = _otpSet
+                .Where(o => o.Email == normalizedEmail && !o.IsUsed);
+
+            foreach (OtpVerification staleOtp in existingOtps)
+            {
+                staleOtp.IsUsed = true;
+                staleOtp.UsedAt = utcNow;
+            }
+
             OtpVerification otpEntity = new OtpVerification
             {
-                MobileNumber = normalizedMobile,
+                Email = normalizedEmail,
                 OtpCode = otpCode,
                 CreatedAt = utcNow,
                 ExpirationTime = utcNow.AddMinutes(5),
@@ -41,22 +50,22 @@ namespace FamilyTree.BL.Services
             _otpSet.Add(otpEntity);
             _context.SaveChanges();
 
-            Console.WriteLine($"OTP for {normalizedMobile}: {otpCode}");
+            Console.WriteLine($"OTP for {normalizedEmail}: {otpCode}");
 
             return otpCode;
         }
 
-        public OtpVerification? GetLatestOtp(string mobileNumber)
+        public OtpVerification? GetLatestOtp(string email)
         {
-            if (string.IsNullOrWhiteSpace(mobileNumber))
+            if (string.IsNullOrWhiteSpace(email))
             {
                 return null;
             }
 
-            string normalizedMobile = NormalizeMobile(mobileNumber);
+            string normalizedEmail = NormalizeEmail(email);
 
             return _otpSet
-                .Where(o => o.MobileNumber == normalizedMobile)
+                .Where(o => o.Email == normalizedEmail)
                 .OrderByDescending(o => o.CreatedAt)
                 .FirstOrDefault();
         }
@@ -73,9 +82,9 @@ namespace FamilyTree.BL.Services
             _context.SaveChanges();
         }
 
-        private static string NormalizeMobile(string mobileNumber)
+        private static string NormalizeEmail(string email)
         {
-            return mobileNumber.Trim();
+            return email.Trim().ToLowerInvariant();
         }
     }
 }

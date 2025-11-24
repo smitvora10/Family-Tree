@@ -10,9 +10,9 @@ namespace FamilyTree.Models.Master
         public int OtpVerificationId { get; set; }
 
         [Required]
-        [StringLength(15)]
-        [Column(TypeName = "varchar(15)")]
-        public string MobileNumber { get; set; } = string.Empty;
+        [StringLength(150)]
+        [Column(TypeName = "varchar(150)")]
+        public string Email { get; set; } = string.Empty;
 
         [Required]
         [StringLength(6)]
