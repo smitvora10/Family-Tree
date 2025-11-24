@@ -50,41 +50,6 @@ namespace FamilyTree.Migrations
                     b.ToTable("Occupation");
                 });
 
-            modelBuilder.Entity("FamilyTree.Models.Master.OtpVerification", b =>
-                {
-                    b.Property<int>("OtpVerificationId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("OtpVerificationId"));
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("DATETIME");
-
-                    b.Property<DateTime>("ExpirationTime")
-                        .HasColumnType("DATETIME");
-
-                    b.Property<bool>("IsUsed")
-                        .HasColumnType("tinyint(1)");
-
-                    b.Property<string>("MobileNumber")
-                        .IsRequired()
-                        .HasMaxLength(15)
-                        .HasColumnType("varchar(15)");
-
-                    b.Property<string>("OtpCode")
-                        .IsRequired()
-                        .HasMaxLength(6)
-                        .HasColumnType("varchar(6)");
-
-                    b.Property<DateTime?>("UsedAt")
-                        .HasColumnType("DATETIME");
-
-                    b.HasKey("OtpVerificationId");
-
-                    b.ToTable("OtpVerification");
-                });
-
             modelBuilder.Entity("FamilyTree.Models.Master.Person", b =>
                 {
                     b.Property<int>("PersonId")
@@ -115,6 +80,9 @@ namespace FamilyTree.Migrations
                         .HasMaxLength(1)
                         .HasColumnType("char(1)");
 
+                    b.Property<byte[]>("PersonImage")
+                        .HasColumnType("longblob");
+
                     b.Property<string>("IsMainPerson")
                         .HasMaxLength(1)
                         .HasColumnType("char(1)");
@@ -137,9 +105,6 @@ namespace FamilyTree.Migrations
 
                     b.Property<string>("OfficeAddress")
                         .HasColumnType("longtext");
-
-                    b.Property<byte[]>("PersonImage")
-                        .HasColumnType("LONGBLOB");
 
                     b.Property<string>("PhoneNo")
                         .HasMaxLength(15)
@@ -275,6 +240,43 @@ namespace FamilyTree.Migrations
                     b.ToTable("Request");
                 });
 
+            modelBuilder.Entity("FamilyTree.Models.Master.OtpVerification", b =>
+                {
+                    b.Property<int>("OtpVerificationId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("OtpVerificationId"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("DATETIME");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("varchar(150)")
+                        .HasAnnotation("MySql:CharSet", "utf8mb4");
+
+                    b.Property<DateTime>("ExpirationTime")
+                        .HasColumnType("DATETIME");
+
+                    b.Property<bool>("IsUsed")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<string>("OtpCode")
+                        .IsRequired()
+                        .HasMaxLength(6)
+                        .HasColumnType("varchar(6)")
+                        .HasAnnotation("MySql:CharSet", "utf8mb4");
+
+                    b.Property<DateTime?>("UsedAt")
+                        .HasColumnType("DATETIME");
+
+                    b.HasKey("OtpVerificationId");
+
+                    b.ToTable("OtpVerification");
+                });
+
             modelBuilder.Entity("FamilyTree.Models.Master.User", b =>
                 {
                     b.Property<int>("UserId")
@@ -289,17 +291,24 @@ namespace FamilyTree.Migrations
                     b.Property<int>("LastUpdatedUserId")
                         .HasColumnType("int");
 
-                    b.Property<string>("MobileNumber")
-                        .IsRequired()
-                        .HasMaxLength(15)
-                        .HasColumnType("varchar(15)");
-
                     b.Property<DateTime?>("ModificationDatetime")
                         .HasColumnType("DATETIME");
 
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("varchar(150)")
+                        .HasAnnotation("MySql:CharSet", "utf8mb4");
+
+                    b.Property<string>("MobileNumber")
+                        .HasMaxLength(15)
+                        .HasColumnType("varchar(15)")
+                        .HasAnnotation("MySql:CharSet", "utf8mb4");
+
                     b.Property<string>("PasswordHash")
                         .HasMaxLength(250)
-                        .HasColumnType("varchar(250)");
+                        .HasColumnType("varchar(250)")
+                        .HasAnnotation("MySql:CharSet", "utf8mb4");
 
                     b.Property<int>("UserRoleId")
                         .HasColumnType("int");
@@ -307,7 +316,8 @@ namespace FamilyTree.Migrations
                     b.Property<string>("Username")
                         .IsRequired()
                         .HasMaxLength(100)
-                        .HasColumnType("varchar(100)");
+                        .HasColumnType("varchar(100)")
+                        .HasAnnotation("MySql:CharSet", "utf8mb4");
 
                     b.HasKey("UserId");
 

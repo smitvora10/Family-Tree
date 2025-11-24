@@ -10,14 +10,14 @@
             {MessageCode.E004,"Erro: Request already Approved"},
             {MessageCode.E005,"Erro: Request already Rejected"},
             {MessageCode.E006,"Erro: Invalid Login Credentials"},
-            {MessageCode.E007,"Erro: Mobile number already registered."},
+            {MessageCode.E007,"Erro: Email already registered."},
             {MessageCode.E008,"Erro: OTP has expired."},
             {MessageCode.E009,"Erro: Invalid OTP provided."},
-            {MessageCode.E010,"Erro: User not found for the provided mobile number."},
+            {MessageCode.E010,"Erro: User not found for the provided email."},
             {MessageCode.E011,"Erro: Username already registered."},
             {MessageCode.E013,"Erro: User details are required."},
             {MessageCode.E014,"Erro: Unable to complete user registration."},
-            {MessageCode.E015,"Erro: Unable to dispatch OTP for the provided mobile number."},
+            {MessageCode.E015,"Erro: Unable to dispatch OTP for the provided email."},
             {MessageCode.E016,"Erro: Registration request payload is missing."},
             {MessageCode.E017,"Erro: OTP verification request payload is missing."},
             {MessageCode.E018,"Erro: OTP has already been used."},
@@ -57,7 +57,7 @@
         E006,
 
         /// <summary>
-        /// Mobile number already registered.
+        /// Email already registered.
         /// </summary>
         E007,
 
@@ -72,7 +72,7 @@
         E009,
 
         /// <summary>
-        /// User not found for the provided mobile number.
+        /// User not found for the provided email.
         /// </summary>
         E010,
 
@@ -92,7 +92,7 @@
         E014,
 
         /// <summary>
-        /// Unable to dispatch OTP for the provided mobile number.
+        /// Unable to dispatch OTP for the provided email.
         /// </summary>
         E015,
 
