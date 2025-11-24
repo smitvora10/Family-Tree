@@ -1,13 +1,15 @@
 using FamilyTree.BL.Services;
 using FamilyTree.Data.Common;
 using FamilyTree.DB.Interfaces;
+using FamilyTree.Models.Common;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace FamilyTree.Extensions
 {
     public static class AllServiceCollection
     {
-        public static void AddServices(this IServiceCollection services)
+        public static void AddServices(this IServiceCollection services, IConfiguration configuration)
         {
             services.AddScoped(typeof(IBaseRepository<>), typeof(DBCommon<>));
             services.AddScoped(typeof(IBaseService<>), typeof(BLCommon<>));
@@ -27,6 +29,9 @@ namespace FamilyTree.Extensions
             services.AddScoped<IOtpService, OtpService>();
             services.AddScoped<IAuthRepository, DBAuth>();
             services.AddScoped<IAuthService, BLAuth>();
+
+            services.Configure<EmailSettings>(configuration.GetSection("SmtpSettings"));
+            services.AddSingleton<IEmailService, EmailService>();
 
             services.AddScoped<IRequestRepository, DBRequest>();
             services.AddScoped<IRequestService, BLRequest>();

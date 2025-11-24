@@ -13,9 +13,13 @@ namespace FamilyTree.Models.Common
         public string Username { get; set; } = string.Empty;
 
         [Required]
+        [EmailAddress]
+        [StringLength(150)]
+        public string Email { get; set; } = string.Empty;
+
         [Phone]
         [StringLength(15)]
-        public string MobileNumber { get; set; } = string.Empty;
+        public string? MobileNumber { get; set; }
 
         [Required]
         [StringLength(100, MinimumLength = 6)]

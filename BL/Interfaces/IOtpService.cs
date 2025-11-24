@@ -4,8 +4,8 @@ namespace FamilyTree.BL.Services
 {
     public interface IOtpService
     {
-        string GenerateOtp(string mobileNumber);
-        OtpVerification? GetLatestOtp(string mobileNumber);
+        string GenerateOtp(string email);
+        OtpVerification? GetLatestOtp(string email);
         void MarkOtpAsUsed(OtpVerification otpVerification);
     }
 }
