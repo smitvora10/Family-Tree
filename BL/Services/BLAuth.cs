@@ -46,13 +46,9 @@ namespace FamilyTree.BL.Services
                 return entityValidation;
             }
 
-            Response persistenceResponse = PersistNewUser(newUser);
-            if (persistenceResponse.IsError)
-            {
-                return persistenceResponse;
-            }
-
-            return FinalizeRegistration(persistenceResponse, newUser);
+            EntryType = enmEntryType.A;
+            Presave(newUser);
+            return FinalizeRegistration(_entity);
         }
 
         public Response VerifyOtp(VerifyOtpRequest request)
@@ -162,11 +158,10 @@ namespace FamilyTree.BL.Services
             return AddOrUpdate();
         }
 
-        private Response FinalizeRegistration(Response persistenceResponse, User pendingUser)
+        private Response FinalizeRegistration(User pendingUser)
         {
-            User? createdUser = ExtractCreatedUser(persistenceResponse, pendingUser);
-            if (createdUser == null)
-            {
+
+            if (pendingUser == null)            {
                 Response failureResponse = new Response
                 {
                     IsError = true,
@@ -175,36 +170,21 @@ namespace FamilyTree.BL.Services
                 return failureResponse;
             }
 
-            Response otpDispatchResponse = DispatchOtp(createdUser.Email);
+            Response otpDispatchResponse = DispatchOtp(pendingUser.Email);
             if (otpDispatchResponse.IsError)
             {
                 return otpDispatchResponse;
             }
 
-            persistenceResponse.Id = createdUser.UserId;
-            persistenceResponse.Message = "Registration successful. OTP sent to the registered email address.";
-            persistenceResponse.DataModel = new
+            response.Id = pendingUser.UserId;
+            response.Message = "Registration successful. OTP sent to the registered email address.";
+            response.DataModel = new
             {
-                Username = createdUser.Username,
-                Email = createdUser.Email
+                Username = pendingUser.Username,
+                Email = pendingUser.Email
             };
 
-            return persistenceResponse;
-        }
-
-        private static User? ExtractCreatedUser(Response persistenceResponse, User pendingUser)
-        {
-            if (persistenceResponse.DataModel is User createdUserFromResponse)
-            {
-                return createdUserFromResponse;
-            }
-
-            if (pendingUser != null && pendingUser.UserId > 0)
-            {
-                return pendingUser;
-            }
-
-            return null;
+            return response;
         }
 
         private Response DispatchOtp(string email)
@@ -224,10 +204,10 @@ namespace FamilyTree.BL.Services
                 string otpCode = _otpService.GenerateOtp(sanitizedEmail);
                 _emailService.SendOtpEmailAsync(sanitizedEmail, otpCode, 5).GetAwaiter().GetResult();
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 otpResponse.IsError = true;
-                otpResponse.MessageCode = MessageCode.E015.ToString();
+                otpResponse.MessageCode =  ex.Message + MessageCode.E015.ToString();
             }
 
             return otpResponse;
@@ -306,7 +286,7 @@ namespace FamilyTree.BL.Services
         private static User BuildNewUser(RegisterRequest request)
         {
             string normalizedUsername = NormalizeUsername(request.Username);
-            string normalizedEmail = NormalizeEmail(request.Email);
+            string normalizedEmail = request.Email;
             string? sanitizedMobile = string.IsNullOrWhiteSpace(request.MobileNumber) ? null : request.MobileNumber.Trim();
             User newUser = new User
             {

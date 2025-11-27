@@ -59,7 +59,7 @@ namespace FamilyTree.BL.Services
             MimeMessage message = new();
             message.From.Add(new MailboxAddress(_emailSettings.FromName, _emailSettings.FromEmail));
             message.To.Add(MailboxAddress.Parse(toEmail));
-            message.Subject = "Your OTP Code";
+            message.Subject = "OTP Code for Vora Family Tree Signup";
 
             string body = $"" +
                 $"Your OTP code is: {otpCode}\n" +

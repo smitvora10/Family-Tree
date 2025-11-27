@@ -11,7 +11,7 @@ namespace FamilyTree.Models.Master
 
         [Required]
         [StringLength(150)]
-        [Column(TypeName = "varchar(150)")]
+        [Column(TypeName = "varchar(255)")]
         public string Email { get; set; } = string.Empty;
 
         [Required]

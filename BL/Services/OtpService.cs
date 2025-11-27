@@ -50,8 +50,6 @@ namespace FamilyTree.BL.Services
             _otpSet.Add(otpEntity);
             _context.SaveChanges();
 
-            Console.WriteLine($"OTP for {normalizedEmail}: {otpCode}");
-
             return otpCode;
         }
 
