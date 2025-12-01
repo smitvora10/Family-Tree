@@ -63,22 +63,6 @@ namespace FamilyTree.Data.Common
             return null;
         }
 
-        //public List<TEntity> GetAll(string[]? includeFields = null, string[]? excludeFields = null)
-        //{
-        //    IQueryable<TEntity> query = _dbSet.AsNoTracking();
-        //    var fieldList = BuildFieldList(includeFields, excludeFields);
-
-        //    // If no filtering, return all
-        //    if (fieldList == null || fieldList.Count == 0)
-        //        return query.ToList();
-
-        //    // Dynamic projection using System.Linq.Dynamic.Core
-        //    string selector = $"new({string.Join(",", fieldList)})";
-        //    // Fix: Use System.Linq.Dynamic.Core's Select extension method, which returns dynamic objects.
-        //    // Cast result to List<dynamic> instead of List<TEntity>
-        //    return _dbSet.Select(selector).ToDynamicList();
-        //}
-
         // --------------------- GET ALL ---------------------
         public virtual object GetAll(string[]? includeFields = null, string[]? excludeFields = null)
         {
