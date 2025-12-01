@@ -19,24 +19,28 @@ namespace FamilyTree.Controllers
         }
 
         [HttpGet("GetAll")]
+        [Authorize("Member")]
         public IActionResult GetAll()
         {
             return Ok(_personService.GetAll());
         }
 
         [HttpGet("GetById")]
+        [Authorize("Member")]
         public IActionResult GetById(int id)
         {
             return Ok(_personService.GetById(id));
         }
 
         [HttpGet("GetImage/{id}")]
+        [Authorize("Member")]
         public IActionResult GetImage(int id)
         {
             return Ok(_personService.GetPersonImage(id));
         }
 
         [HttpGet("GetWholeTree")]
+        [Authorize("Member")]
         public IActionResult GetWholeTree()
         {
             return Ok(_personService.GetWholeTree());

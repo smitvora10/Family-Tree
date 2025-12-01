@@ -32,9 +32,27 @@ namespace FamilyTree.BL.Services
             _logger = logger;
         }
 
+
         public Response ValidateUser(LoginRequest request)
         {
-            return _authRepository.ValidateUser(request);
+            Response response = _authRepository.ValidateUser(request);
+
+            if (!response.IsError)
+            {
+                string token = _tokenService.GenerateToken(response.Id ?? 0, request.UserRoleId);
+
+                LoginValidate objLV = new LoginValidate
+                {
+                    Username = request.Username,
+                    UserRoleId = request.UserRoleId,
+                    UserId = response.Id ?? 0,
+                    Token = token
+                };
+
+                response.DataModel = objLV;
+            }
+
+            return response;
         }
 
         public async Task<Response> RegisterUser(RegisterRequest request)
@@ -179,17 +197,6 @@ namespace FamilyTree.BL.Services
             return validationResponse;
         }
 
-        private Response PersistNewUser(User user)
-        {
-            response = new Response();
-            EntryType = enmEntryType.A;
-
-            Presave(user);
-            return AddOrUpdate();
-        }
-
-
-
         private async Task<Response> DispatchOtp(string email)
         {
             _logger.LogInformation("[BLAuth] Dispatching OTP to {Email}", email);
@@ -298,12 +305,11 @@ namespace FamilyTree.BL.Services
         {
             string normalizedUsername = NormalizeUsername(request.Username);
             string normalizedEmail = request.Email;
-            string? sanitizedMobile = string.IsNullOrWhiteSpace(request.MobileNumber) ? null : request.MobileNumber.Trim();
             User newUser = new User
             {
                 Username = normalizedUsername,
                 Email = normalizedEmail,
-                MobileNumber = sanitizedMobile,
+                MobileNumber = null,
                 Password = request.Password.Trim(),
                 UserRoleId = request.UserRoleId
             };

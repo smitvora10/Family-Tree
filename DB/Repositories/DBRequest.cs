@@ -12,9 +12,9 @@ namespace FamilyTree.BL.Services
         {
         }
 
-        public DataTable GetDetailedRequests()
+        public DataTable GetDetailedRequests(int? userId = null)
         {
-            const string sql = @"
+            string sql = @"
 SELECT
     r.RequestId,
     r.ApprovalStatus AS ApprovalStatusSymbol,
@@ -49,10 +49,17 @@ SELECT
         ELSE ''
     END AS ActionSymbol,
     COALESCE(u.Username, '') AS LastUpdatedBy,
+    r.LastUpdatedUserId,
     r.CreationDatetime,
     r.ApprovedDatetime
 FROM Request r
 LEFT JOIN `User` u ON r.LastUpdatedUserId = u.UserId";
+
+            if (userId.HasValue && userId.Value > 0)
+            {
+                sql += " WHERE r.LastUpdatedUserId = @p0";
+                return ExecuteSql(sql, userId.Value);
+            }
 
             return ExecuteSql(sql);
         }
@@ -94,6 +101,7 @@ SELECT
         ELSE ''
     END AS ActionSymbol,
     COALESCE(u.Username, '') AS LastUpdatedBy,
+    r.LastUpdatedUserId,
     r.CreationDatetime,
     r.ApprovedDatetime
 FROM Request r

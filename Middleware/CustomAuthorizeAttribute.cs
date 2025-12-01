@@ -9,17 +9,26 @@ public class CustomAuthorizeFilter : Attribute, IAuthorizationFilter
 {
     private readonly string[] _roles;
     private readonly ITokenService _tokenService;
+    private readonly bool _isGlobal;
 
-    public CustomAuthorizeFilter(ITokenService tokenService, params string[] roles)
+    public CustomAuthorizeFilter(ITokenService tokenService, bool isGlobal, string[] roles)
     {
         _roles = roles;
         _tokenService = tokenService;
+        _isGlobal = isGlobal;
     }
 
     public void OnAuthorization(AuthorizationFilterContext context)
     {
         if (context.ActionDescriptor.EndpointMetadata.OfType<AllowAnonymousAttribute>().Any())
             return;
+
+        // If this is the global filter and the action has a specific AuthorizeAttribute, skip this global check.
+        // The action-level filter will handle the authorization.
+        if (_isGlobal && context.ActionDescriptor.EndpointMetadata.OfType<AuthorizeAttribute>().Any())
+        {
+            return;
+        }
 
         var authHeader = context.HttpContext.Request.Headers["Authorization"].FirstOrDefault();
         if (string.IsNullOrEmpty(authHeader) || !authHeader.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase))

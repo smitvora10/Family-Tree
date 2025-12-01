@@ -11,7 +11,7 @@ namespace FamilyTree.BL.Services
     public class DBAuth : DBCommon<User>, IAuthRepository
     {
         private readonly DbSet<User> _dbSet;
-        private readonly DataContext _context;
+
         Response response = new();
         public DBAuth(DataContext context) : base(context)
         {

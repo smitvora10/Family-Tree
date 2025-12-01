@@ -80,7 +80,7 @@ namespace FamilyTree.Data.Common
         //}
 
         // --------------------- GET ALL ---------------------
-        public List<dynamic> GetAll(string[]? includeFields = null, string[]? excludeFields = null)
+        public virtual object GetAll(string[]? includeFields = null, string[]? excludeFields = null)
         {
             IQueryable<TEntity> query = _dbSet.AsNoTracking();
             var fieldList = BuildFieldList(includeFields, excludeFields);
@@ -165,7 +165,7 @@ namespace FamilyTree.Data.Common
             return value.Equals(defaultValue);
         }
 
-        public TEntity GetById(int id)
+        public virtual object GetById(int id)
         {
             return _dbSet.Find(id);
         }

@@ -9,12 +9,10 @@ using Microsoft.AspNetCore.Mvc;
 [Route("api/Auth")]
 public class CLAuthController : ControllerBase
 {
-    private readonly ITokenService _tokenService;
     private readonly IAuthService _authService;
 
-    public CLAuthController(ITokenService tokenService, IAuthService authService)
+    public CLAuthController(IAuthService authService)
     {
-        _tokenService = tokenService;
         _authService = authService;
     }
 
@@ -38,20 +36,7 @@ public class CLAuthController : ControllerBase
     [AllowAnonymous]
     public IActionResult Login([FromBody] LoginRequest loginRequest)
     {
-        // Example: Validate from database
         Response response = _authService.ValidateUser(loginRequest);
-
-        if (!response.IsError)
-        {
-            LoginValidate objLV = new();
-            objLV.Username = loginRequest.Username;
-            objLV.UserRoleId = loginRequest.UserRoleId;
-            objLV.UserId = (int)response.Id;
-            objLV.Token = _tokenService.GenerateToken((int)response.Id, loginRequest.UserRoleId);
-
-
-            response.DataModel = objLV;
-        }
         return Ok(response);
     }
 }

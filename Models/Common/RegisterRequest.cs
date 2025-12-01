@@ -17,8 +17,7 @@ namespace FamilyTree.Models.Common
         [StringLength(150)]
         public string Email { get; set; } = string.Empty;
 
-        [StringLength(15)]
-        public string? MobileNumber { get; set; }
+
 
         [Required]
         [StringLength(100, MinimumLength = 6)]

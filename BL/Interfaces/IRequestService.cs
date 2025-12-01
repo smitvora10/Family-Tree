@@ -7,7 +7,9 @@ namespace FamilyTree.BL.Services
     public interface IRequestService : IBaseService<DTORequest>
     {
         public enmApprovalStatus ApprovalStatus { get; set; }
-        Response PreApproveRequest(int requestiId);
+        public int CurrentUserId { get; set; }
+        public int CurrentUserRole { get; set; }
+        Response PreApproveRequest(int requestId);
         Response ApproveRequest();
     }
 }

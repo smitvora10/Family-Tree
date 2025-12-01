@@ -108,11 +108,6 @@ namespace FamilyTree.BL.Services
             lstPerson = _dbSet.ToList();
 
             // Optimization: Do not populate images here. Images should be fetched lazily.
-            // foreach (var person in lstPerson)
-            // {
-            //    PopulatePersonImage(person);
-            // }
-
             response.DataModel = BuildFamilyTree();
 
             return response;
@@ -138,27 +133,23 @@ namespace FamilyTree.BL.Services
 
         private Person BuildFamilyTreeNode(Person currentPerson, HashSet<int> visitedPerson)
         {
-            if (currentPerson == null || visitedPerson.Contains(currentPerson.PersonId) /*|| visitedPerson.Contains(currentPerson.SpouseId)*/)
+            if (currentPerson == null || visitedPerson.Contains(currentPerson.PersonId))
                 return null;
             visitedPerson.Add(currentPerson.PersonId);
-            //Person spouse = lstPerson.FirstOrDefault(p => p.PersonId == currentPerson.SpouseId);
+
             Person objPerson = new Person
             {
                 PersonId = currentPerson.PersonId,
                 FirstName = currentPerson.FirstName,
                 LastName = currentPerson.LastName,
                 BirthDate = currentPerson.BirthDate,
-                //DateOfDeath = currentPerson.DateOfDeath,
                 Description = currentPerson.Description,
                 MaritalStatus = currentPerson.MaritalStatus,
                 Address = currentPerson.Address,
                 Occupation = currentPerson.Occupation,
                 Qualification = currentPerson.Qualification,
                 // Optimization: Do not send base64 image in the tree. Use GetPersonImage endpoint.
-                PersonImageBase64 = null, // currentPerson.PersonImage != null ? Convert.ToBase64String(currentPerson.PersonImage) : currentPerson.PersonImageBase64,
-                //Mother = lstPerson.FirstOrDefault(p => p.PersonId == currentPerson.MotherId),
-                //Father = lstPerson.FirstOrDefault(p => p.PersonId == currentPerson.FatherId),
-                //Spouse = spouse != null && !visitedPerson.Contains(currentPerson.SpouseId) ? spouse : null,
+                PersonImageBase64 = null,
                 Children = lstPerson
                 .Where(p => p.FatherId == currentPerson.PersonId)
                 .Select(child => BuildFamilyTreeNode(child, visitedPerson))

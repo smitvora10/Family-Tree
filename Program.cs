@@ -13,28 +13,14 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddServices(builder.Configuration);
 
-//// 👇 Add JWT authentication
-//builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-//    .AddJwtBearer(options =>
-//    {
-//        options.TokenValidationParameters = new TokenValidationParameters
-//        {
-//            ValidateIssuer = true,
-//            ValidateAudience = true,
-//            ValidateLifetime = true,
-//            ValidateIssuerSigningKey = true,
-//            ValidIssuer = builder.Configuration["JwtSettings:Issuer"] ?? "your_issuer",
-//            ValidAudience = builder.Configuration["JwtSettings:Audience"] ?? "your_audience",
-//            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey))
-//        };
-//    });
-
 // Configure MVC controllers and JSON serialization to use PascalCase
 var mvcBuilder = builder.Services.AddControllers(options =>
 {
     // Add global filter that will authorize all endpoints
     // Empty roles array means any authenticated user can access
-    options.Filters.Add(new AuthorizeAttribute(new string[] { "Admin" }));
+    options.Filters.Add(new AuthorizeAttribute(true, new string[] { "Admin" }));
+    // We will handle authorization at the controller/action level or via custom logic
+    // options.Filters.Add(new AuthorizeAttribute());
 });
 
 mvcBuilder.AddJsonOptions(options =>
@@ -112,11 +98,8 @@ if (app.Environment.IsDevelopment())
     });
 }
 
-//app.MapIdentityApi<IdentityUser>();
-
 app.UseHttpsRedirection();
 
-//app.UseAuthentication();
 app.UseAuthorization();
 
 app.UseRouting();

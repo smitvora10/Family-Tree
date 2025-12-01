@@ -25,11 +25,20 @@ namespace FamilyTree.BL.Services
             _dbSet = context.Set<Request>();
         }
 
+        public int CurrentUserId { get; set; }
+        public int CurrentUserRole { get; set; }
+
         public override Response GetAll(string[]? includeFields = null, string[]? excludeFields = null)
         {
+            int? userIdToFilter = null;
+            if (CurrentUserRole == 2) // Member
+            {
+                userIdToFilter = CurrentUserId;
+            }
+
             response = new Response
             {
-                Data = _dbContext.GetDetailedRequests()
+                Data = _dbContext.GetDetailedRequests(userIdToFilter)
             };
 
             return response;
@@ -55,14 +64,47 @@ namespace FamilyTree.BL.Services
                 return response;
             }
 
-            response.Data = result;
+            // Check authorization for Member
+            if (CurrentUserRole == 2)
+            {
+                // Assuming LastUpdatedUserId is in the result (we added it)
+                if (result.Columns.Contains("LastUpdatedUserId"))
+                {
+                    var row = result.Rows[0];
+                    if (row["LastUpdatedUserId"] != DBNull.Value)
+                    {
+                        int ownerId = Convert.ToInt32(row["LastUpdatedUserId"]);
+                        if (ownerId != CurrentUserId)
+                        {
+                            response.IsError = true;
+                            response.Message = "Unauthorized to view this request.";
+                            return response;
+                        }
+                    }
+                }
+            }
 
+            response.Data = result;
             return response;
         }
 
         public Response ApproveRequest()
         {
-            Person objPerson = JsonConvert.DeserializeObject<Person>(objRequest.Person);
+            if (objRequest == null || string.IsNullOrEmpty(objRequest.Person))
+            {
+                response.IsError = true;
+                response.Message = "Invalid Request Data";
+                return response;
+            }
+
+            Person? objPerson = JsonConvert.DeserializeObject<Person>(objRequest.Person);
+            if (objPerson == null)
+            {
+                response.IsError = true;
+                response.Message = "Invalid Person Data";
+                return response;
+            }
+
             _personService.EntryType = objRequest.Action;
             response = _personService.ValidationBeforePreSave(objPerson);
             if (!response.IsError)
@@ -80,7 +122,7 @@ namespace FamilyTree.BL.Services
 
         public Response PreApproveRequest(int requestId)
         {
-            objRequest = _dbSet.Find(requestId);
+            objRequest = _dbSet.Find(requestId)!;
             if (objRequest == null)
             {
                 response.IsError = true;
@@ -94,7 +136,7 @@ namespace FamilyTree.BL.Services
             {
                 if (ApprovalStatus == enmApprovalStatus.A)
                 {
-                    if (objRequest.ApprovalStatus == "A")
+                    if (objRequest!.ApprovalStatus == "A")
                     {
                         response.IsError = true;
                         response.Message = MessageCode.E004.ToString();
@@ -102,7 +144,7 @@ namespace FamilyTree.BL.Services
                 }
                 if (ApprovalStatus == enmApprovalStatus.R)
                 {
-                    if (objRequest.ApprovalStatus == "R")
+                    if (objRequest!.ApprovalStatus == "R")
                     {
                         response.IsError = true;
                         response.Message = MessageCode.E005.ToString();
@@ -112,11 +154,27 @@ namespace FamilyTree.BL.Services
             return response;
         }
 
+        public override Response Delete(int id)
+        {
+            if (CurrentUserRole == 2)
+            {
+                var req = _dbSet.Find(id);
+                if (req != null && req.LastUpdatedUserId != CurrentUserId)
+                {
+                    response.IsError = true;
+                    response.Message = "Unauthorized to delete this request.";
+                    return response;
+                }
+            }
+            return base.Delete(id);
+        }
+
         public void Presave(DTORequest entity)
         {
             objRequest = new Request();
             objRequest.Action = entity.Action;
             objRequest.Person = JsonConvert.SerializeObject(entity.Person);
+            objRequest.LastUpdatedUserId = CurrentUserId;
             base.Presave(objRequest);
         }
 

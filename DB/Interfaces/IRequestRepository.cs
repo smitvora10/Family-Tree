@@ -6,7 +6,7 @@ namespace FamilyTree.DB.Interfaces
 {
     public interface IRequestRepository : IBaseRepository<Request>
     {
-        DataTable GetDetailedRequests();
+        DataTable GetDetailedRequests(int? userId = null);
         DataTable GetDetailedRequestById(int id);
     }
 }

@@ -19,21 +19,27 @@ namespace FamilyTree.Controllers
         }
 
         [HttpGet("GetAll")]
+        [Authorize("Member")]
         public IActionResult GetAll()
         {
+            SetUserContext();
             return Ok(_requestService.GetAll());
         }
 
         [HttpGet("GetById")]
+        [Authorize("Member")]
         public IActionResult GetById(int id)
         {
+            SetUserContext();
             return Ok(_requestService.GetById(id));
         }
 
 
         [HttpPost]
+        [Authorize("Member")]
         public IActionResult Create([FromBody] DTORequest entity)
         {
+            SetUserContext();
             _requestService.EntryType = enmEntryType.A;
             objResponse = _requestService.ValidationBeforePreSave(entity);
             if (!objResponse.IsError)
@@ -45,8 +51,10 @@ namespace FamilyTree.Controllers
         }
 
         [HttpPut]
+        [Authorize("Member")]
         public async Task<IActionResult> Update(DTORequest entity)
         {
+            SetUserContext();
             _requestService.EntryType = enmEntryType.E;
             objResponse = _requestService.ValidationBeforePreSave(entity);
             if (!objResponse.IsError)
@@ -60,6 +68,7 @@ namespace FamilyTree.Controllers
         [HttpPost("UpdateStatus")]
         public IActionResult UpdateStatus(int requestId, enmApprovalStatus ApprovalStatus = enmApprovalStatus.A)
         {
+            SetUserContext();
             _requestService.ApprovalStatus = ApprovalStatus;
             objResponse = _requestService.PreApproveRequest(requestId);
             if (!objResponse.IsError)
@@ -70,10 +79,24 @@ namespace FamilyTree.Controllers
         }
 
         [HttpDelete]
+        [Authorize("Member")]
         public IActionResult Delete(int id)
         {
+            SetUserContext();
             _requestService.EntryType = enmEntryType.D;
             return Ok(_requestService.Delete(id));
+        }
+
+        private void SetUserContext()
+        {
+            if (HttpContext.Items.TryGetValue("UserId", out var userIdObj) && userIdObj is int userId)
+            {
+                _requestService.CurrentUserId = userId;
+            }
+            if (HttpContext.Items.TryGetValue("RoleId", out var roleIdObj) && roleIdObj is int roleId)
+            {
+                _requestService.CurrentUserRole = roleId;
+            }
         }
     }
 }

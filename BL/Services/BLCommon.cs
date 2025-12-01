@@ -36,14 +36,15 @@ namespace FamilyTree.BL.Services
 
         public virtual Response GetById(int id)
         {
-            if (id == 0 || !_dbContext.EntityExists(id))
+            var data = _dbContext.GetById(id);
+            if (data == null)
             {
                 response.IsError = true;
                 response.MessageCode = MessageCode.E001.ToString();
             }
             else
             {
-                response.DataModel = _dbContext.GetById(id);
+                response.DataModel = data;
             }
             return response;
         }

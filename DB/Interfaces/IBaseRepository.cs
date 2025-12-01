@@ -16,7 +16,7 @@ namespace FamilyTree.BL.Services
         /// Get All Records
         /// </summary>
         /// <returns></returns>
-        List<dynamic> GetAll(string[]? includeFields = null, string[]? excludeFields = null);
+        object GetAll(string[]? includeFields = null, string[]? excludeFields = null);
 
         /// <summary>
         /// Checks if an entity with matching key fields already exists.
@@ -32,7 +32,7 @@ namespace FamilyTree.BL.Services
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        TEntity GetById(int id);
+        object GetById(int id);
 
         //Add
         TEntity Add(TEntity entity);

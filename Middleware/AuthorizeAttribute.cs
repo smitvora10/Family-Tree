@@ -3,8 +3,13 @@
 public class AuthorizeAttribute : TypeFilterAttribute
 {
     public AuthorizeAttribute(params string[] roles)
+        : this(false, roles)
+    {
+    }
+
+    public AuthorizeAttribute(bool isGlobal, params string[] roles)
         : base(typeof(CustomAuthorizeFilter))
     {
-        Arguments = new object[] { roles };
+        Arguments = new object[] { isGlobal, roles };
     }
 }
