@@ -20,6 +20,7 @@ namespace FamilyTree.BL.Services
 
         public string GenerateOtp(string email)
         {
+            Console.WriteLine($"[OtpService] Generating OTP for {email}");
             if (string.IsNullOrWhiteSpace(email))
             {
                 throw new ArgumentException("Email is required.", nameof(email));
@@ -48,7 +49,8 @@ namespace FamilyTree.BL.Services
             };
 
             _otpSet.Add(otpEntity);
-            _context.SaveChanges();
+            int changes = _context.SaveChanges();
+            Console.WriteLine($"[OtpService] OTP generated and saved. Changes: {changes}. Code: {otpCode}");
 
             return otpCode;
         }

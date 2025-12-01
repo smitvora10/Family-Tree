@@ -1,5 +1,7 @@
 using FamilyTree.BL.Services;
+using System.Threading.Tasks;
 using FamilyTree.Models.Common;
+using System.Collections.Generic;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -18,9 +20,9 @@ public class CLAuthController : ControllerBase
 
     [HttpPost("register")]
     [AllowAnonymous]
-    public IActionResult Register([FromBody] RegisterRequest registerRequest)
+    public async Task<IActionResult> Register([FromBody] RegisterRequest registerRequest)
     {
-        Response response = _authService.RegisterUser(registerRequest);
+        Response response = await _authService.RegisterUser(registerRequest);
         return Ok(response);
     }
 
@@ -52,8 +54,4 @@ public class CLAuthController : ControllerBase
         }
         return Ok(response);
     }
-
-
 }
-
-

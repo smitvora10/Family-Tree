@@ -10,5 +10,6 @@ namespace FamilyTree.BL.Services
         List<Person> BuildFamilyTree(Person currentPerson = null);
 
         Response UploadImage(int personId, string? imageBase64);
+        Response GetPersonImage(int personId);
     }
 }

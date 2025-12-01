@@ -30,6 +30,12 @@ namespace FamilyTree.Controllers
             return Ok(_personService.GetById(id));
         }
 
+        [HttpGet("GetImage/{id}")]
+        public IActionResult GetImage(int id)
+        {
+            return Ok(_personService.GetPersonImage(id));
+        }
+
         [HttpGet("GetWholeTree")]
         public IActionResult GetWholeTree()
         {
@@ -46,7 +52,7 @@ namespace FamilyTree.Controllers
                 _personService.Presave(entity);
                 objResponse = _personService.AddOrUpdate();
             }
-            return Ok(objResponse)  ;
+            return Ok(objResponse);
         }
 
         [HttpPut]

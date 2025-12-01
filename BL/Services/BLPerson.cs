@@ -15,7 +15,7 @@ namespace FamilyTree.BL.Services
         private readonly DbSet<Person> _dbSet;
         private readonly DataContext _context;
 
-        public List<Person> lstPerson = new List<Person>();
+        private List<Person> lstPerson = new List<Person>();
 
         public BLPerson(IPersonRepository dbContext, DataContext context) : base(dbContext)
         {
@@ -107,10 +107,11 @@ namespace FamilyTree.BL.Services
         {
             lstPerson = _dbSet.ToList();
 
-            foreach (var person in lstPerson)
-            {
-                PopulatePersonImage(person);
-            }
+            // Optimization: Do not populate images here. Images should be fetched lazily.
+            // foreach (var person in lstPerson)
+            // {
+            //    PopulatePersonImage(person);
+            // }
 
             response.DataModel = BuildFamilyTree();
 
@@ -153,7 +154,8 @@ namespace FamilyTree.BL.Services
                 Address = currentPerson.Address,
                 Occupation = currentPerson.Occupation,
                 Qualification = currentPerson.Qualification,
-                PersonImageBase64 = currentPerson.PersonImage != null ? Convert.ToBase64String(currentPerson.PersonImage) : currentPerson.PersonImageBase64,
+                // Optimization: Do not send base64 image in the tree. Use GetPersonImage endpoint.
+                PersonImageBase64 = null, // currentPerson.PersonImage != null ? Convert.ToBase64String(currentPerson.PersonImage) : currentPerson.PersonImageBase64,
                 //Mother = lstPerson.FirstOrDefault(p => p.PersonId == currentPerson.MotherId),
                 //Father = lstPerson.FirstOrDefault(p => p.PersonId == currentPerson.FatherId),
                 //Spouse = spouse != null && !visitedPerson.Contains(currentPerson.SpouseId) ? spouse : null,
@@ -198,6 +200,29 @@ namespace FamilyTree.BL.Services
             person.PersonImage = decodedImage;
             _context.SaveChanges();
             response.Message = "Image uploaded successfully.";
+
+            return response;
+        }
+
+        public Response GetPersonImage(int personId)
+        {
+            response = new Response();
+            // Optimization: Only fetch the PersonImage column, not the entire record
+            var personImage = _context.Person
+                .AsNoTracking()
+                .Where(p => p.PersonId == personId)
+                .Select(p => p.PersonImage)
+                .FirstOrDefault();
+
+            if (personImage != null && personImage.Length > 0)
+            {
+                response.DataModel = new { ImageBase64 = Convert.ToBase64String(personImage) };
+            }
+            else
+            {
+                // Return null or empty if not found, but don't error out as it might just be no image
+                response.DataModel = new { ImageBase64 = (string?)null };
+            }
 
             return response;
         }

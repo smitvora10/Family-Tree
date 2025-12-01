@@ -22,29 +22,52 @@ namespace FamilyTree.BL.Services
 
         public async Task SendOtpEmailAsync(string toEmail, string otpCode, int expiryMinutes)
         {
+            Console.WriteLine($"[EmailService] Sending OTP email to {toEmail}");
             if (string.IsNullOrWhiteSpace(toEmail))
             {
                 throw new ArgumentException("Recipient email is required.", nameof(toEmail));
             }
 
+            if (string.IsNullOrWhiteSpace(_emailSettings.Host) || string.IsNullOrWhiteSpace(_emailSettings.FromEmail))
+            {
+                throw new InvalidOperationException("Email settings are not configured. Please check your appsettings.json.");
+            }
+
             MimeMessage emailMessage = BuildMessage(toEmail, otpCode, expiryMinutes);
 
             using SmtpClient smtpClient = new();
-            SecureSocketOptions socketOptions = _emailSettings.UseSsl ? SecureSocketOptions.SslOnConnect : SecureSocketOptions.StartTlsWhenAvailable;
+            SecureSocketOptions socketOptions;
+            if (_emailSettings.Port == 587)
+            {
+                socketOptions = SecureSocketOptions.StartTls;
+            }
+            else if (_emailSettings.UseSsl)
+            {
+                socketOptions = SecureSocketOptions.SslOnConnect;
+            }
+            else
+            {
+                socketOptions = SecureSocketOptions.StartTlsWhenAvailable;
+            }
 
             try
             {
+                Console.WriteLine($"[EmailService] Connecting to SMTP host: {_emailSettings.Host}:{_emailSettings.Port}");
                 await smtpClient.ConnectAsync(_emailSettings.Host, _emailSettings.Port, socketOptions).ConfigureAwait(false);
 
                 if (!string.IsNullOrEmpty(_emailSettings.Username))
                 {
+                    Console.WriteLine($"[EmailService] Authenticating as {_emailSettings.Username}");
                     await smtpClient.AuthenticateAsync(_emailSettings.Username, _emailSettings.Password).ConfigureAwait(false);
                 }
 
+                Console.WriteLine("[EmailService] Sending message...");
                 await smtpClient.SendAsync(emailMessage).ConfigureAwait(false);
+                Console.WriteLine("[EmailService] Email sent successfully.");
             }
             catch (Exception ex)
             {
+                Console.WriteLine($"[EmailService] ERROR: {ex.Message}");
                 _logger.LogError(ex, "Failed to send OTP email to {Email}", toEmail);
                 throw;
             }

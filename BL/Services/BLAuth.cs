@@ -1,4 +1,5 @@
 using System;
+using System.Threading.Tasks;
 using System.Linq;
 using FamilyTree.Core;
 using FamilyTree.Data;
@@ -6,6 +7,8 @@ using FamilyTree.DB.Interfaces;
 using FamilyTree.Models.Common;
 using FamilyTree.Models.Master;
 using Microsoft.EntityFrameworkCore;
+
+using Microsoft.Extensions.Logging;
 
 namespace FamilyTree.BL.Services
 {
@@ -15,14 +18,18 @@ namespace FamilyTree.BL.Services
         private readonly IOtpService _otpService;
         private readonly IEmailService _emailService;
         private readonly DbSet<User> _userSet;
+        private readonly ITokenService _tokenService;
+        private readonly ILogger<BLAuth> _logger;
 
-        public BLAuth(IAuthRepository authRepository, DataContext context, IOtpService otpService, IEmailService emailService)
+        public BLAuth(IAuthRepository authRepository, DataContext context, IOtpService otpService, IEmailService emailService, ITokenService tokenService, ILogger<BLAuth> logger)
             : base(authRepository)
         {
             _authRepository = authRepository;
             _otpService = otpService;
             _emailService = emailService;
+            _tokenService = tokenService;
             _userSet = context.Set<User>();
+            _logger = logger;
         }
 
         public Response ValidateUser(LoginRequest request)
@@ -30,7 +37,7 @@ namespace FamilyTree.BL.Services
             return _authRepository.ValidateUser(request);
         }
 
-        public Response RegisterUser(RegisterRequest request)
+        public async Task<Response> RegisterUser(RegisterRequest request)
         {
             Response requestValidation = ValidateRegisterUserRequest(request);
             if (requestValidation.IsError)
@@ -46,9 +53,32 @@ namespace FamilyTree.BL.Services
                 return entityValidation;
             }
 
+            // Attempt to send OTP first
+            Response otpDispatchResponse = await DispatchOtp(newUser.Email);
+            if (otpDispatchResponse.IsError)
+            {
+                return otpDispatchResponse;
+            }
+
+            // If OTP sent successfully, save the user
             EntryType = enmEntryType.A;
             Presave(newUser);
-            return FinalizeRegistration(_entity);
+            Response saveResponse = AddOrUpdate();
+
+            if (saveResponse.IsError)
+            {
+                return saveResponse;
+            }
+
+            // Construct success response
+            saveResponse.Message = "Registration successful. OTP sent to the registered email address.";
+            saveResponse.DataModel = new
+            {
+                Username = newUser.Username,
+                Email = newUser.Email
+            };
+
+            return saveResponse;
         }
 
         public Response VerifyOtp(VerifyOtpRequest request)
@@ -80,7 +110,7 @@ namespace FamilyTree.BL.Services
                 return persistenceResponse;
             }
 
-            return BuildOtpVerificationResponse(user.UserId, user.Username ?? string.Empty, normalizedEmail);
+            return BuildOtpVerificationResponse(user.UserId, user.Username ?? string.Empty, normalizedEmail, user.UserRoleId);
         }
 
         public override Response ValidationBeforePreSave(User user)
@@ -158,37 +188,11 @@ namespace FamilyTree.BL.Services
             return AddOrUpdate();
         }
 
-        private Response FinalizeRegistration(User pendingUser)
+
+
+        private async Task<Response> DispatchOtp(string email)
         {
-
-            if (pendingUser == null)            {
-                Response failureResponse = new Response
-                {
-                    IsError = true,
-                    MessageCode = MessageCode.E014.ToString()
-                };
-                return failureResponse;
-            }
-
-            Response otpDispatchResponse = DispatchOtp(pendingUser.Email);
-            if (otpDispatchResponse.IsError)
-            {
-                return otpDispatchResponse;
-            }
-
-            response.Id = pendingUser.UserId;
-            response.Message = "Registration successful. OTP sent to the registered email address.";
-            response.DataModel = new
-            {
-                Username = pendingUser.Username,
-                Email = pendingUser.Email
-            };
-
-            return response;
-        }
-
-        private Response DispatchOtp(string email)
-        {
+            _logger.LogInformation("[BLAuth] Dispatching OTP to {Email}", email);
             Response otpResponse = new Response();
 
             string sanitizedEmail = NormalizeEmail(email);
@@ -202,12 +206,15 @@ namespace FamilyTree.BL.Services
             try
             {
                 string otpCode = _otpService.GenerateOtp(sanitizedEmail);
-                _emailService.SendOtpEmailAsync(sanitizedEmail, otpCode, 5).GetAwaiter().GetResult();
+                _logger.LogInformation("[BLAuth] OTP Generated. Sending email...");
+                await _emailService.SendOtpEmailAsync(sanitizedEmail, otpCode, 5);
+                _logger.LogInformation("[BLAuth] Email sent.");
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "[BLAuth] Error dispatching OTP");
                 otpResponse.IsError = true;
-                otpResponse.MessageCode =  ex.Message + MessageCode.E015.ToString();
+                otpResponse.MessageCode = ex.Message + MessageCode.E015.ToString();
             }
 
             return otpResponse;
@@ -222,8 +229,10 @@ namespace FamilyTree.BL.Services
             return AddOrUpdate();
         }
 
-        private Response BuildOtpVerificationResponse(int userId, string username, string normalizedEmail)
+        private Response BuildOtpVerificationResponse(int userId, string username, string normalizedEmail, int userRoleId)
         {
+            string token = _tokenService.GenerateToken(userId, userRoleId);
+
             Response verificationResponse = new Response
             {
                 Id = userId,
@@ -232,6 +241,8 @@ namespace FamilyTree.BL.Services
                 {
                     Username = username,
                     Email = normalizedEmail,
+                    UserRoleId = userRoleId,
+                    Token = token,
                     VerifiedAt = DateTime.UtcNow
                 }
             };
