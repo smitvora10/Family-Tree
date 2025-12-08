@@ -18,12 +18,12 @@ namespace FamilyTree.Controllers
             _requestService = requestService;
         }
 
-        [HttpGet("GetAll")]
+        [HttpPost("GetAll")]
         [Authorize("Member")]
-        public IActionResult GetAll()
+        public IActionResult GetAll([FromBody] CommonSearchModel model)
         {
             SetUserContext();
-            return Ok(_requestService.GetAll());
+            return Ok(_requestService.GetAll(model));
         }
 
         [HttpGet("GetById")]
@@ -89,11 +89,11 @@ namespace FamilyTree.Controllers
 
         private void SetUserContext()
         {
-            if (HttpContext.Items.TryGetValue("UserId", out var userIdObj) && userIdObj is int userId)
+            if (HttpContext.Items.TryGetValue("UserId", out object? userIdObj) && userIdObj is int userId)
             {
                 _requestService.CurrentUserId = userId;
             }
-            if (HttpContext.Items.TryGetValue("RoleId", out var roleIdObj) && roleIdObj is int roleId)
+            if (HttpContext.Items.TryGetValue("RoleId", out object? roleIdObj) && roleIdObj is int roleId)
             {
                 _requestService.CurrentUserRole = roleId;
             }

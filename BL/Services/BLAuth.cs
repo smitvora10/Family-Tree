@@ -131,6 +131,58 @@ namespace FamilyTree.BL.Services
             return BuildOtpVerificationResponse(user.UserId, user.Username ?? string.Empty, normalizedEmail, user.UserRoleId);
         }
 
+        public Response UpdateProfile(UpdateProfileRequest request)
+        {
+            User? user = _userSet.FirstOrDefault(u => u.UserId == request.UserId);
+            if (user == null)
+            {
+                return CreateErrorResponse(MessageCode.E013); // User not found
+            }
+
+            // Update fields
+            if (!string.IsNullOrWhiteSpace(request.Username))
+            {
+                user.Username = NormalizeUsername(request.Username);
+            }
+            if (!string.IsNullOrWhiteSpace(request.Email))
+            {
+                user.Email = NormalizeEmail(request.Email);
+            }
+            // Mobile number can be null or empty
+            user.MobileNumber = request.MobileNumber;
+
+            // Persist (ValidationBeforePreSave will handle dupe checks)
+            return PersistExistingUser(user);
+        }
+
+        public async Task<Response> ChangePassword(ChangePasswordRequest request)
+        {
+            string normalizedEmail = NormalizeEmail(request.Email);
+            User? user = FindUserByEmail(normalizedEmail);
+            if (user == null)
+            {
+                return CreateErrorResponse(MessageCode.E010);
+            }
+
+            // Verify OTP
+            Response otpValidation = ValidateAndConsumeOtp(normalizedEmail, request.Otp);
+            if (otpValidation.IsError)
+            {
+                return otpValidation;
+            }
+
+            // Update Password
+            user.Password = request.NewPassword;
+
+            // Persist
+            return PersistExistingUser(user);
+        }
+
+        public async Task<Response> SendOtp(SendOtpRequest request)
+        {
+            return await DispatchOtp(request.Email);
+        }
+
         public override Response ValidationBeforePreSave(User user)
         {
             Response validationResponse = new Response();

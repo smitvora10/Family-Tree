@@ -1,12 +1,13 @@
 using System.Data;
 using FamilyTree.BL.Services;
+using FamilyTree.Models.Common;
 using FamilyTree.Models.Master;
 
 namespace FamilyTree.DB.Interfaces
 {
     public interface IRequestRepository : IBaseRepository<Request>
     {
-        DataTable GetDetailedRequests(int? userId = null);
+        DataTable GetDetailedRequests(int? userId = null, CommonSearchModel? model = null);
         DataTable GetDetailedRequestById(int id);
     }
 }

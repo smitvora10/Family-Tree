@@ -1,4 +1,5 @@
 using System.Data;
+using FamilyTree.Models.Common;
 using FamilyTree.Data;
 using FamilyTree.Data.Common;
 using FamilyTree.DB.Interfaces;
@@ -12,7 +13,7 @@ namespace FamilyTree.BL.Services
         {
         }
 
-        public DataTable GetDetailedRequests(int? userId = null)
+        public DataTable GetDetailedRequests(int? userId = null, CommonSearchModel? model = null)
         {
             string sql = @"
 SELECT
@@ -55,13 +56,55 @@ SELECT
 FROM Request r
 LEFT JOIN `User` u ON r.LastUpdatedUserId = u.UserId";
 
+            List<object> parameters = new List<object>();
+
             if (userId.HasValue && userId.Value > 0)
             {
                 sql += " WHERE r.LastUpdatedUserId = @p0";
-                return ExecuteSql(sql, userId.Value);
+                parameters.Add(userId.Value);
+            }
+            else
+            {
+                sql += " WHERE 1=1";
             }
 
-            return ExecuteSql(sql);
+            if (model != null)
+            {
+                if (!string.IsNullOrEmpty(model.SearchValue))
+                {
+                    // Search in Person JSON Fields
+                    // JSON_EXTRACT(r.Person, '$.FirstName') 
+                    sql += " AND (JSON_UNQUOTE(JSON_EXTRACT(r.Person, '$.FirstName')) LIKE @p" + parameters.Count +
+                           " OR JSON_UNQUOTE(JSON_EXTRACT(r.Person, '$.LastName')) LIKE @p" + parameters.Count + ")";
+                    parameters.Add($"%{model.SearchValue}%");
+                }
+
+                if (model.FilterList != null && model.FilterList.Count > 0)
+                {
+
+                    foreach (KeyValuePair<string, string> filter in model.FilterList)
+                    {
+                        if (!filter.Key.All(char.IsLetterOrDigit)) continue; // Basic sanitization
+
+                        // Check if key is a top level Request field or Person JSON field
+                        // For simplicity, let's assume if it matches Request column, use it, else try Person JSON
+                        // Or just simplistic:
+                        if (filter.Key == "ApprovalStatus")
+                        {
+                            sql += $" AND r.ApprovalStatus = @p{parameters.Count}";
+                            parameters.Add(filter.Value);
+                        }
+                        else
+                        {
+                            // Try JSON
+                            sql += $" AND JSON_UNQUOTE(JSON_EXTRACT(r.Person, '$.{filter.Key}')) = @p{parameters.Count}";
+                            parameters.Add(filter.Value);
+                        }
+                    }
+                }
+            }
+
+            return ExecuteSql(sql, parameters.ToArray());
         }
 
         public DataTable GetDetailedRequestById(int id)

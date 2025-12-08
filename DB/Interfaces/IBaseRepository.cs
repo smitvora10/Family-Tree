@@ -1,4 +1,5 @@
-﻿using System.Data;
+﻿using FamilyTree.Models.Common;
+using System.Data;
 
 namespace FamilyTree.BL.Services
 {
@@ -13,10 +14,18 @@ namespace FamilyTree.BL.Services
         bool EntityExists(int id);
 
         /// <summary>
-        /// Get All Records
+        /// Gets generic DDL data with restricted fields
         /// </summary>
+        /// <param name="model">The DDL request model containing include/exclude fields</param>
         /// <returns></returns>
-        object GetAll(string[]? includeFields = null, string[]? excludeFields = null);
+        DataTable GetDDLData(CommonDDLRequest model);
+
+        /// <summary>
+        /// Get All Records with Search and Filter
+        /// </summary>
+        /// <param name="model">Search and Filter Model</param>
+        /// <returns></returns>
+        DataTable GetAll(CommonSearchModel model);
 
         /// <summary>
         /// Checks if an entity with matching key fields already exists.
@@ -32,7 +41,7 @@ namespace FamilyTree.BL.Services
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        object GetById(int id);
+        DataTable GetById(int id);
 
         //Add
         TEntity Add(TEntity entity);

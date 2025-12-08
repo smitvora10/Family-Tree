@@ -18,11 +18,11 @@ namespace FamilyTree.Controllers
             _personService = personService;
         }
 
-        [HttpGet("GetAll")]
+        [HttpPost("GetAll")]
         [Authorize("Member")]
-        public IActionResult GetAll()
+        public IActionResult GetAll([FromBody] CommonSearchModel model)
         {
-            return Ok(_personService.GetAll());
+            return Ok(_personService.GetAll(model));
         }
 
         [HttpGet("GetById")]
@@ -37,6 +37,20 @@ namespace FamilyTree.Controllers
         public IActionResult GetImage(int id)
         {
             return Ok(_personService.GetPersonImage(id));
+        }
+
+        [HttpPost("GetPersonDDL")]
+        [Authorize("Member")]
+        public IActionResult GetPersonDDL([FromBody] CommonSearchModel model)
+        {
+            return Ok(_personService.GetPersonDDL(model));
+        }
+
+        [HttpPost("GetDDLData")]
+        [Authorize("Member")]
+        public IActionResult GetDDLData([FromBody] CommonDDLRequest model)
+        {
+            return Ok(_personService.GetDDLData(model));
         }
 
         [HttpGet("GetWholeTree")]

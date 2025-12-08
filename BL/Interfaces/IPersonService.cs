@@ -11,5 +11,7 @@ namespace FamilyTree.BL.Services
 
         Response UploadImage(int personId, string? imageBase64);
         Response GetPersonImage(int personId);
+
+        Response GetPersonDDL(CommonSearchModel model);
     }
 }

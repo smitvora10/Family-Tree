@@ -1,4 +1,5 @@
 using FamilyTree.Core;
+using System.Data;
 using FamilyTree.Data;
 using FamilyTree.DB.Interfaces;
 using FamilyTree.Models.Common;
@@ -28,7 +29,7 @@ namespace FamilyTree.BL.Services
         public int CurrentUserId { get; set; }
         public int CurrentUserRole { get; set; }
 
-        public override Response GetAll(string[]? includeFields = null, string[]? excludeFields = null)
+        public override Response GetAll(CommonSearchModel model)
         {
             int? userIdToFilter = null;
             if (CurrentUserRole == 2) // Member
@@ -38,11 +39,13 @@ namespace FamilyTree.BL.Services
 
             response = new Response
             {
-                Data = _dbContext.GetDetailedRequests(userIdToFilter)
+                Data = _dbContext.GetDetailedRequests(userIdToFilter, model)
             };
 
             return response;
         }
+
+
 
         public override Response GetById(int id)
         {
@@ -55,7 +58,7 @@ namespace FamilyTree.BL.Services
                 return response;
             }
 
-            var result = _dbContext.GetDetailedRequestById(id);
+            DataTable result = _dbContext.GetDetailedRequestById(id);
 
             if (result == null || result.Rows.Count == 0)
             {
@@ -70,7 +73,7 @@ namespace FamilyTree.BL.Services
                 // Assuming LastUpdatedUserId is in the result (we added it)
                 if (result.Columns.Contains("LastUpdatedUserId"))
                 {
-                    var row = result.Rows[0];
+                    DataRow row = result.Rows[0];
                     if (row["LastUpdatedUserId"] != DBNull.Value)
                     {
                         int ownerId = Convert.ToInt32(row["LastUpdatedUserId"]);
@@ -158,7 +161,7 @@ namespace FamilyTree.BL.Services
         {
             if (CurrentUserRole == 2)
             {
-                var req = _dbSet.Find(id);
+                Request? req = _dbSet.Find(id);
                 if (req != null && req.LastUpdatedUserId != CurrentUserId)
                 {
                     response.IsError = true;

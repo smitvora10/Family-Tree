@@ -11,7 +11,7 @@ namespace FamilyTree.Controllers
     [Route("api/[controller]")]
 
     public class CLUserController : ControllerBase
-    {  
+    {
         Response objResponse = new Response();
 
         private readonly IUserService _userService;
@@ -20,11 +20,18 @@ namespace FamilyTree.Controllers
             _userService = userService;
         }
 
-        [HttpGet("GetAll")]
+        [HttpPost("GetAll")]
         [Authorize("Admin")]
-        public IActionResult GetAll()
+        public IActionResult GetAll([FromBody] CommonSearchModel model)
         {
-            return Ok(_userService.GetAll());
+            return Ok(_userService.GetAll(model));
+        }
+
+        [HttpPost("GetDDLData")]
+        [Authorize("Admin")]
+        public IActionResult GetDDLData([FromBody] CommonDDLRequest model)
+        {
+            return Ok(_userService.GetDDLData(model));
         }
 
         [HttpGet("GetById")]

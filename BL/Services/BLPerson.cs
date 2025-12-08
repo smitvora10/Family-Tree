@@ -14,11 +14,13 @@ namespace FamilyTree.BL.Services
     {
         private readonly DbSet<Person> _dbSet;
         private readonly DataContext _context;
+        private readonly IPersonRepository _personRepository;
 
         private List<Person> lstPerson = new List<Person>();
 
         public BLPerson(IPersonRepository dbContext, DataContext context) : base(dbContext)
         {
+            _personRepository = dbContext;
             _dbSet = context.Set<Person>();
             _context = context;
         }
@@ -44,14 +46,14 @@ namespace FamilyTree.BL.Services
 
             if (person.PersonImageBase64 != null)
             {
-                var trimmedImage = person.PersonImageBase64.Trim();
+                string trimmedImage = person.PersonImageBase64.Trim();
 
                 if (trimmedImage.Length == 0)
                 {
                     person.PersonImage = null;
                     person.PersonImageBase64 = null;
                 }
-                else if (!TryDecodeBase64Image(trimmedImage, out var imageBytes))
+                else if (!TryDecodeBase64Image(trimmedImage, out byte[] imageBytes))
                 {
                     response.IsError = true;
                     response.Message = "Invalid Base64 image format.";
@@ -65,7 +67,7 @@ namespace FamilyTree.BL.Services
             }
             else if (EntryType == Core.enmEntryType.E)
             {
-                var existing = _context.Person.AsNoTracking().FirstOrDefault(p => p.PersonId == person.PersonId);
+                Person? existing = _context.Person.AsNoTracking().FirstOrDefault(p => p.PersonId == person.PersonId);
                 if (existing != null)
                 {
                     person.PersonImage = existing.PersonImage;
@@ -75,33 +77,9 @@ namespace FamilyTree.BL.Services
             return response;
         }
 
-        public override Response GetAll(string[]? includeFields = null, string[]? excludeFields = null)
-        {
-            var responseResult = base.GetAll(includeFields, excludeFields);
-            if (responseResult.DataModel is IEnumerable<object> collection)
-            {
-                foreach (var item in collection)
-                {
-                    if (item is Person person)
-                    {
-                        PopulatePersonImage(person);
-                    }
-                }
-            }
 
-            return responseResult;
-        }
 
-        public override Response GetById(int id)
-        {
-            var responseResult = base.GetById(id);
-            if (!responseResult.IsError && responseResult.DataModel is Person person)
-            {
-                PopulatePersonImage(person);
-            }
 
-            return responseResult;
-        }
 
         public Response GetWholeTree()
         {
@@ -126,7 +104,7 @@ namespace FamilyTree.BL.Services
             }
             else
             {
-                var node = BuildFamilyTreeNode(currentPerson, visitedPerson);
+                Person? node = BuildFamilyTreeNode(currentPerson, visitedPerson);
                 return node != null ? new List<Person> { node } : new List<Person>();
             }
         }
@@ -148,8 +126,10 @@ namespace FamilyTree.BL.Services
                 Address = currentPerson.Address,
                 Occupation = currentPerson.Occupation,
                 Qualification = currentPerson.Qualification,
-                // Optimization: Do not send base64 image in the tree. Use GetPersonImage endpoint.
-                PersonImageBase64 = null,
+                // Optimization: Sending base64 image in the tree as requested.
+                PersonImageBase64 = (currentPerson.PersonImage != null && currentPerson.PersonImage.Length > 0)
+                                    ? Convert.ToBase64String(currentPerson.PersonImage)
+                                    : null,
                 Children = lstPerson
                 .Where(p => p.FatherId == currentPerson.PersonId)
                 .Select(child => BuildFamilyTreeNode(child, visitedPerson))
@@ -165,7 +145,7 @@ namespace FamilyTree.BL.Services
             response.IsError = false;
             response.Message = string.Empty;
 
-            var person = _context.Person.FirstOrDefault(p => p.PersonId == personId);
+            Person? person = _context.Person.FirstOrDefault(p => p.PersonId == personId);
             if (person == null)
             {
                 response.IsError = true;
@@ -181,7 +161,7 @@ namespace FamilyTree.BL.Services
                 return response;
             }
 
-            if (!TryDecodeBase64Image(imageBase64.Trim(), out var decodedImage))
+            if (!TryDecodeBase64Image(imageBase64.Trim(), out byte[] decodedImage))
             {
                 response.IsError = true;
                 response.Message = "Invalid Base64 image format.";
@@ -199,7 +179,7 @@ namespace FamilyTree.BL.Services
         {
             response = new Response();
             // Optimization: Only fetch the PersonImage column, not the entire record
-            var personImage = _context.Person
+            byte[]? personImage = _context.Person
                 .AsNoTracking()
                 .Where(p => p.PersonId == personId)
                 .Select(p => p.PersonImage)
@@ -215,6 +195,12 @@ namespace FamilyTree.BL.Services
                 response.DataModel = new { ImageBase64 = (string?)null };
             }
 
+            return response;
+        }
+
+        public Response GetPersonDDL(CommonSearchModel model)
+        {
+            response.DataModel = _personRepository.GetPersonDDL(model);
             return response;
         }
 

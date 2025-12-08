@@ -16,7 +16,7 @@ public class CLAuthController : ControllerBase
         _authService = authService;
     }
 
-    [HttpPost("register")]
+    [HttpPost("Register")]
     [AllowAnonymous]
     public async Task<IActionResult> Register([FromBody] RegisterRequest registerRequest)
     {
@@ -24,7 +24,7 @@ public class CLAuthController : ControllerBase
         return Ok(response);
     }
 
-    [HttpPost("verify-otp")]
+    [HttpPost("VerifyOtp")]
     [AllowAnonymous]
     public IActionResult VerifyOtp([FromBody] VerifyOtpRequest verifyOtpRequest)
     {
@@ -32,11 +32,35 @@ public class CLAuthController : ControllerBase
         return Ok(response);
     }
 
-    [HttpPost("login")]
+    [HttpPost("Login")]
     [AllowAnonymous]
     public IActionResult Login([FromBody] LoginRequest loginRequest)
     {
         Response response = _authService.ValidateUser(loginRequest);
+        return Ok(response);
+    }
+
+    [HttpPost("UpdateProfile")]
+    [Authorize]
+    public IActionResult UpdateProfile([FromBody] UpdateProfileRequest request)
+    {
+        Response response = _authService.UpdateProfile(request);
+        return Ok(response);
+    }
+
+    [HttpPost("SendOtp")]
+    [AllowAnonymous]
+    public async Task<IActionResult> SendOtp([FromBody] SendOtpRequest request)
+    {
+        Response response = await _authService.SendOtp(request);
+        return Ok(response);
+    }
+
+    [HttpPost("ChangePassword")]
+    [AllowAnonymous]
+    public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequest request)
+    {
+        Response response = await _authService.ChangePassword(request);
         return Ok(response);
     }
 }

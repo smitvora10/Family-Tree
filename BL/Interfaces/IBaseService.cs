@@ -16,10 +16,18 @@ namespace FamilyTree.BL.Services
         bool EntityExists(int id);
 
         /// <summary>
-        /// Get All Records
+        /// Gets generic DDL data with restricted fields
         /// </summary>
+        /// <param name="model">The DDL request model containing include/exclude fields</param>
         /// <returns></returns>
-        Response GetAll(string[]? includeFields = null, string[]? excludeFields = null);
+        Response GetDDLData(CommonDDLRequest model);
+
+        /// <summary>
+        /// Get All Records with Search and Filter
+        /// </summary>
+        /// <param name="model">Search and Filter Model</param>
+        /// <returns></returns>
+        Response GetAll(CommonSearchModel model);
 
         /// <summary>
         /// Checks whether the supplied entity has duplicate values for the provided fields

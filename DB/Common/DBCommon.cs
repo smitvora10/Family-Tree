@@ -10,6 +10,8 @@ using System.Reflection;
 
 namespace FamilyTree.Data.Common
 {
+    using FamilyTree.Models.Common;
+
     public class DBCommon<TEntity> : IBaseRepository<TEntity> where TEntity : class
     {
         private static readonly ConcurrentDictionary<Type, IReadOnlyDictionary<string, PropertyInfo>> _propertyCache = new();
@@ -26,14 +28,14 @@ namespace FamilyTree.Data.Common
         {
             return _idPropertyCache.GetOrAdd(type, static t =>
             {
-                var properties = GetPropertyMap(t);
+                IReadOnlyDictionary<string, PropertyInfo> properties = GetPropertyMap(t);
 
-                if (properties.TryGetValue("Id", out var idProp))
+                if (properties.TryGetValue("Id", out PropertyInfo? idProp))
                 {
                     return idProp;
                 }
 
-                properties.TryGetValue($"{t.Name}Id", out var namedIdProp);
+                properties.TryGetValue($"{t.Name}Id", out PropertyInfo? namedIdProp);
                 return namedIdProp;
             });
         }
@@ -50,7 +52,7 @@ namespace FamilyTree.Data.Common
         // ---------- COMMON HELPER ----------
         private List<string>? BuildFieldList(string[]? includeFields, string[]? excludeFields)
         {
-            var allProps = typeof(TEntity).GetProperties()
+            List<string> allProps = typeof(TEntity).GetProperties()
                 .Select(p => p.Name)
                 .ToList();
 
@@ -63,24 +65,122 @@ namespace FamilyTree.Data.Common
             return null;
         }
 
+        private DataTable ListToDataTable(IEnumerable<dynamic> items)
+        {
+            var dataTable = new DataTable(typeof(TEntity).Name);
+            var itemList = items.ToList();
+
+            if (itemList.Count == 0) return dataTable;
+
+            var firstItem = (object)itemList[0];
+            var properties = firstItem.GetType().GetProperties();
+
+            foreach (var prop in properties)
+            {
+                var type = Nullable.GetUnderlyingType(prop.PropertyType) ?? prop.PropertyType;
+                dataTable.Columns.Add(prop.Name, type);
+            }
+
+            foreach (var item in itemList)
+            {
+                var values = new object?[properties.Length];
+                for (int i = 0; i < properties.Length; i++)
+                {
+                    values[i] = properties[i].GetValue(item);
+                }
+                dataTable.Rows.Add(values);
+            }
+
+            return dataTable;
+        }
+
+        private DataTable ListToDataTable<T>(IEnumerable<T> items)
+        {
+            var dataTable = new DataTable(typeof(TEntity).Name);
+            // Get all properties of the Entity
+            var properties = typeof(T).GetProperties(BindingFlags.Public | BindingFlags.Instance);
+
+            foreach (var prop in properties)
+            {
+                var type = Nullable.GetUnderlyingType(prop.PropertyType) ?? prop.PropertyType;
+                // DataTable doesn't support some types, careful here
+                dataTable.Columns.Add(prop.Name, type);
+            }
+
+            foreach (var item in items)
+            {
+                var values = new object?[properties.Length];
+                for (int i = 0; i < properties.Length; i++)
+                {
+                    values[i] = properties[i].GetValue(item);
+                }
+                dataTable.Rows.Add(values);
+            }
+
+            return dataTable;
+        }
+
         // --------------------- GET ALL ---------------------
-        public virtual object GetAll(string[]? includeFields = null, string[]? excludeFields = null)
+        // --------------------- GET DDL DATA ---------------------
+        public virtual DataTable GetDDLData(CommonDDLRequest model)
         {
             IQueryable<TEntity> query = _dbSet.AsNoTracking();
-            var fieldList = BuildFieldList(includeFields, excludeFields);
+            List<string>? fieldList = BuildFieldList(model?.IncludeFields, model?.ExcludeFields);
 
             // If no filtering, return everything
             if (fieldList == null)
-                return query.ToList().Cast<dynamic>().ToList();
+            {
+                // Dynamic list to datatable logic or generic
+                // Use simple reflection if full entity
+                return ListToDataTable(query.ToList());
+            }
 
             if (fieldList.Count == 0)
-                return new List<dynamic>();
+                return new DataTable();
 
             // Build selector string for dynamic LINQ
             string selector = $"new({string.Join(",", fieldList)})";
 
-            // ✅ Use System.Linq.Dynamic.Core extension
-            return query.Select(selector).ToDynamicList();
+            // Use System.Linq.Dynamic.Core extension
+            var dynamicList = query.Select(selector).ToDynamicList();
+            return ListToDataTable(dynamicList);
+        }
+
+        public virtual DataTable GetAll(CommonSearchModel model)
+        {
+            IQueryable<TEntity> query = _dbSet.AsNoTracking();
+
+            // 1. Generic Filter List
+            if (model.FilterList != null && model.FilterList.Count > 0)
+            {
+                IReadOnlyDictionary<string, PropertyInfo> propertyMap = GetPropertyMap(typeof(TEntity));
+                int i = 0;
+                List<object> values = new List<object>();
+                string whereClause = "";
+
+                foreach (KeyValuePair<string, string> filter in model.FilterList)
+                {
+                    if (propertyMap.ContainsKey(filter.Key))
+                    {
+                        // Use dynamic linq syntax: "Field == @0"
+                        if (whereClause.Length > 0) whereClause += " && ";
+                        whereClause += $"{filter.Key} == @{i}";
+                        values.Add(filter.Value);
+                        i++;
+                    }
+                }
+
+                if (whereClause.Length > 0)
+                {
+                    query = query.Where(whereClause, values.ToArray());
+                }
+            }
+
+            // 2. Search Value (Generic Attempt or Skip)
+            // For now, base implementation does not guess fields for generic search. 
+            // Subclasses should override this if they want specific text search (like DBPerson).
+
+            return ListToDataTable(query.ToList());
         }
 
 
@@ -92,19 +192,19 @@ namespace FamilyTree.Data.Common
             if (!string.Equals(tableName, entityType.Name, StringComparison.OrdinalIgnoreCase))
                 throw new ArgumentException($"Table name '{tableName}' does not match entity type '{entityType.Name}'.", nameof(tableName));
 
-            var propertyMap = GetPropertyMap(entityType);
-            var comparisons = new List<string>();
-            var parameters = new List<object?>();
+            IReadOnlyDictionary<string, PropertyInfo> propertyMap = GetPropertyMap(entityType);
+            List<string> comparisons = new List<string>();
+            List<object?> parameters = new List<object?>();
 
-            foreach (var field in keyFields)
+            foreach (string field in keyFields)
             {
                 if (string.IsNullOrWhiteSpace(field))
                     throw new ArgumentException("Key field names cannot be null or whitespace.", nameof(keyFields));
 
-                if (!propertyMap.TryGetValue(field, out var property))
+                if (!propertyMap.TryGetValue(field, out PropertyInfo? property))
                     throw new ArgumentException($"Property '{field}' was not found on type '{entityType.Name}'.", nameof(keyFields));
 
-                var value = property.GetValue(entity);
+                object? value = property.GetValue(entity);
 
                 if (value == null)
                 {
@@ -117,10 +217,10 @@ namespace FamilyTree.Data.Common
                 }
             }
 
-            var idProperty = GetIdProperty(entityType);
+            PropertyInfo? idProperty = GetIdProperty(entityType);
             if (idProperty != null)
             {
-                var idValue = idProperty.GetValue(entity);
+                object? idValue = idProperty.GetValue(entity);
                 if (!IsDefaultValue(idValue, idProperty.PropertyType))
                 {
                     comparisons.Add($"{idProperty.Name} != @{parameters.Count}");
@@ -131,7 +231,7 @@ namespace FamilyTree.Data.Common
             if (comparisons.Count == 0)
                 return false;
 
-            var predicate = string.Join(" AND ", comparisons);
+            string predicate = string.Join(" AND ", comparisons);
             return _dbSet.AsNoTracking().Where(predicate, parameters.ToArray()).Any();
         }
 
@@ -143,15 +243,17 @@ namespace FamilyTree.Data.Common
             if (!type.IsValueType)
                 return false;
 
-            var underlying = Nullable.GetUnderlyingType(type) ?? type;
-            var defaultValue = Activator.CreateInstance(underlying);
+            Type underlying = Nullable.GetUnderlyingType(type) ?? type;
+            object? defaultValue = Activator.CreateInstance(underlying);
 
             return value.Equals(defaultValue);
         }
 
-        public virtual object GetById(int id)
+        public virtual DataTable GetById(int id)
         {
-            return _dbSet.Find(id);
+            var entity = _dbSet.Find(id);
+            if (entity == null) return new DataTable(); // Or appropriate empty
+            return ListToDataTable(new List<TEntity> { entity });
         }
 
         public TEntity CheckDuplicate(int id)
@@ -166,7 +268,7 @@ namespace FamilyTree.Data.Common
 
         public TEntity Add(TEntity entity)
         {
-            var result = _dbSet.Add(entity);
+            Microsoft.EntityFrameworkCore.ChangeTracking.EntityEntry<TEntity> result = _dbSet.Add(entity);
             _context.SaveChanges();
             return result.Entity;
         }
@@ -181,7 +283,7 @@ namespace FamilyTree.Data.Common
         public int Delete(int id)
         {
             int delOpt = 0;
-            var entity = _dbSet.Find(id);
+            TEntity? entity = _dbSet.Find(id);
             if (entity != null)
             {
                 _dbSet.Remove(entity);
@@ -193,9 +295,9 @@ namespace FamilyTree.Data.Common
 
         public DataTable ExecuteSql(string sql, params object[] parameters)
         {
-            var dataTable = new DataTable();
+            DataTable dataTable = new DataTable();
 
-            using (var command = _context.Database.GetDbConnection().CreateCommand())
+            using (System.Data.Common.DbCommand command = _context.Database.GetDbConnection().CreateCommand())
             {
                 command.CommandText = sql;
                 command.CommandType = CommandType.Text;
@@ -204,7 +306,7 @@ namespace FamilyTree.Data.Common
                 {
                     for (int i = 0; i < parameters.Length; i++)
                     {
-                        var parameter = command.CreateParameter();
+                        System.Data.Common.DbParameter parameter = command.CreateParameter();
                         parameter.ParameterName = $"@p{i}";
                         parameter.Value = parameters[i];
                         command.Parameters.Add(parameter);
@@ -216,7 +318,7 @@ namespace FamilyTree.Data.Common
                     _context.Database.GetDbConnection().Open();
                 }
 
-                using (var reader = command.ExecuteReader())
+                using (System.Data.Common.DbDataReader reader = command.ExecuteReader())
                 {
                     dataTable.Load(reader);
                 }

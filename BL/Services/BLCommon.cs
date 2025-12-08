@@ -1,6 +1,7 @@
 ﻿using FamilyTree.Core;
 using FamilyTree.Models.Common;
 using Microsoft.EntityFrameworkCore;
+using System.Data;
 
 namespace FamilyTree.BL.Services
 {
@@ -23,9 +24,23 @@ namespace FamilyTree.BL.Services
 
 
         // ---------- COMMON HELPER ----------
-        public virtual Response GetAll(string[]? includeFields = null, string[]? excludeFields = null)
+        public virtual Response GetDDLData(CommonDDLRequest model)
         {
-            response.DataModel = _dbContext.GetAll(includeFields, excludeFields);
+            var data = _dbContext.GetDDLData(model);
+            if (data is DataTable dt)
+                response.Data = dt;
+            else
+                response.DataModel = data;
+            return response;
+        }
+
+        public virtual Response GetAll(CommonSearchModel model)
+        {
+            var data = _dbContext.GetAll(model);
+            if (data is DataTable dt)
+                response.Data = dt;
+            else
+                response.DataModel = data;
             return response;
         }
 
@@ -44,7 +59,14 @@ namespace FamilyTree.BL.Services
             }
             else
             {
-                response.DataModel = data;
+                if (data is DataTable dt)
+                {
+                    response.Data = dt;
+                }
+                else
+                {
+                    response.DataModel = data;
+                }
             }
             return response;
         }
